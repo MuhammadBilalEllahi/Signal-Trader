@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../services/AuthService.dart';
 
 
 
@@ -10,8 +13,29 @@ class Layout extends StatefulWidget {
 }
 
 class _LayoutState extends State<Layout> {
+
+
+
+
+
+  _signOut(){
+    Provider.of<AuthService>(context,listen: false).signOut();
+  }
+
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      appBar: AppBar(),
+      body: ListView(
+        children: [
+          TextButton(onPressed: ()=>_signOut(), child: Text("Sign out"))
+        ],
+      )
+    );
   }
 }
