@@ -39,9 +39,9 @@
             android:name="io.flutter.embedding.android.EnableImpeller"
             android:value="false" />
 
-         <!-- <meta-data
+         <meta-data
         android:name="com.google.android.gms.auth.api.signin"
-        android:value="@string/default_web_client_id" /> -->
+        android:value="@string/default_web_client_id" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

@@ -46,14 +46,14 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 
-	<!-- <key>CFBundleURLTypes</key>
+	<key>CFBundleURLTypes</key>
 <array>
     <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-            <string>com.googleusercontent.apps.YOUR_CLIENT_ID</string>
+            <string>com.googleusercontent.apps.1002153357322-lof6cq5ijdef1globfml8ggvedv5fgmm.apps.googleusercontent.com</string>
         </array>
     </dict>
-</array> -->
+</array>
 </dict>
 </plist>
