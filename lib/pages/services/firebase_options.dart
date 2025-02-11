@@ -47,27 +47,29 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyB6PH7ywnnVer88772oTzWJnxICaLNtW9k',
-    appId: '1:1071619500164:web:1daac89f1e03d4b33efad1',
-    messagingSenderId: '1071619500164',
-    projectId: 'meeme-2c986',
-    authDomain: 'meeme-2c986.firebaseapp.com',
-    storageBucket: 'medical-67f6f.appspot.com',
-  );
+      apiKey: "AIzaSyD7mIN8SBquPfoYJ6ZuHRI-kjpBGKnXfPc",
+      authDomain: "trading-app-1bc0e.firebaseapp.com",
+      projectId: "trading-app-1bc0e",
+      storageBucket: "trading-app-1bc0e.firebasestorage.app",
+      messagingSenderId: "1002153357322",
+      appId: "1:1002153357322:web:9531afcfe83441206e6ff3",
+      measurementId: "G-LE4EB3Q4SM");
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyB6PH7ywnnVer88772oTzWJnxICaLNtW9k',
-    appId: '1:1071619500164:web:1daac89f1e03d4b33efad1',
-    messagingSenderId: '1071619500164',
-    projectId: 'meeme-2c986',
-    storageBucket: 'medical-67f6f.appspot.com',
-  );
+      apiKey: "AIzaSyD7mIN8SBquPfoYJ6ZuHRI-kjpBGKnXfPc",
+      authDomain: "trading-app-1bc0e.firebaseapp.com",
+      projectId: "trading-app-1bc0e",
+      storageBucket: "trading-app-1bc0e.firebasestorage.app",
+      messagingSenderId: "1002153357322",
+      appId: "1:1002153357322:web:9531afcfe83441206e6ff3",
+      measurementId: "G-LE4EB3Q4SM");
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyB6PH7ywnnVer88772oTzWJnxICaLNtW9k',
-    appId: '1:1071619500164:web:1daac89f1e03d4b33efad1',
-    messagingSenderId: '1071619500164',
-    projectId: 'meeme-2c986',
-    storageBucket: 'medical-67f6f.appspot.com',
-  );
+      apiKey: "AIzaSyD7mIN8SBquPfoYJ6ZuHRI-kjpBGKnXfPc",
+      authDomain: "trading-app-1bc0e.firebaseapp.com",
+      projectId: "trading-app-1bc0e",
+      storageBucket: "trading-app-1bc0e.firebasestorage.app",
+      messagingSenderId: "1002153357322",
+      appId: "1:1002153357322:web:9531afcfe83441206e6ff3",
+      measurementId: "G-LE4EB3Q4SM");
 }
