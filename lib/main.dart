@@ -5,6 +5,7 @@ import 'package:tradingapp/pages/UI/GetStarted.dart';
 import 'package:tradingapp/pages/auth/AuthGate.dart';
 import 'package:tradingapp/pages/auth/SignIn.dart';
 import 'package:tradingapp/pages/services/AuthService.dart';
+import 'package:tradingapp/pages/services/ThemeService.dart';
 import 'package:tradingapp/pages/services/UserService.dart';
 import 'package:tradingapp/pages/services/constants/constants.dart';
 import 'package:tradingapp/pages/services/firebase_options.dart';
@@ -18,7 +19,8 @@ void main() async{
   runApp(
       MultiProvider(providers: [
         ChangeNotifierProvider(create: (create)=>UserService()),
-        ChangeNotifierProvider(create: (create)=>AuthService())
+        ChangeNotifierProvider(create: (create)=>AuthService()),
+        ChangeNotifierProvider(create: (create)=>ThemeService(ThemeMode.light))
       ]
       ,
       child:const MyApp()));
@@ -29,10 +31,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme=Provider.of<ThemeService>(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: AppConstants.appName,
-      theme: ThemeData(useMaterial3: true,),
+      themeMode: theme.getTheme,
+      theme: theme.getLightTheme(),
       initialRoute: AppRoutes.authGate,
 
       routes: {
