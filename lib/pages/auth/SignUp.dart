@@ -55,6 +55,7 @@ class _SignUpState extends State<SignUp> {
               suffixIcon: IconButton(onPressed: (){setState(() {_showPassword=!_showPassword;});}, icon: _showPassword ? const Icon(CupertinoIcons.eye_slash_fill) : const Icon(CupertinoIcons.eye_fill)),
               hintText: "Password",
             )),
+        SizedBox(height: 25),
         ElevatedButton(onPressed: ()=>_signUp(), child: Text("Sign up")),
         const SizedBox(height: 25),
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [

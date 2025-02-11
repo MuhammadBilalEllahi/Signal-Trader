@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tradingapp/pages/auth/SignOrSignUp.dart';
 
+import '../UI/GetStarted.dart';
+
 
 class OnBoardingScreen extends StatefulWidget {
   const OnBoardingScreen({super.key});
@@ -43,7 +45,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
             physics: const NeverScrollableScrollPhysics(),
             controller: _pageController,
             children: [
-              _buildScreen("assets/images/onboarding.jpg", "0"),
+              GetStartedScreen(pageController: _pageController,),
               // _buildScreen("", "1"),
               // _buildScreen("", "2"),
               const SignInOrSign()
@@ -52,74 +54,74 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
 
           //Control Buttons
-          Visibility(
-            visible: _isShow,
-            child: AnimatedOpacity(
-              opacity: _isShow?1:0,
-              duration: const Duration(milliseconds: 300),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 25),
-                alignment: const Alignment(0, 0.78),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // GestureDetector(
-                    //     onTap: _isShow?(){_pageController.previousPage(duration: const Duration(milliseconds: 500), curve: Curves.easeIn);}:null,
-                    //     child: Container(
-                    //       padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 50),
-                    //       decoration: BoxDecoration(
-                    //           borderRadius: BorderRadius.circular(15),
-                    //           color: HexColor("#13192B")
-                    //       ),
-                    //       child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 35),
-                    //     )
-                    // ),
-                    GestureDetector(
-                        onTap: _isShow? (){_pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeIn);}:null,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 50),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              color: HexColor("#000000")
-                          ),
-                          child: Text("Get Started",style: TextStyle(color: HexColor("#f3f4f6")),),
-                        )),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          // Visibility(
+          //   visible: _isShow,
+          //   child: AnimatedOpacity(
+          //     opacity: _isShow?1:0,
+          //     duration: const Duration(milliseconds: 300),
+          //     child: Container(
+          //       padding: EdgeInsets.symmetric(horizontal: 25),
+          //       alignment: const Alignment(0, 0.78),
+          //       child: Row(
+          //         mainAxisAlignment: MainAxisAlignment.start,
+          //         crossAxisAlignment: CrossAxisAlignment.center,
+          //         children: [
+          //           // GestureDetector(
+          //           //     onTap: _isShow?(){_pageController.previousPage(duration: const Duration(milliseconds: 500), curve: Curves.easeIn);}:null,
+          //           //     child: Container(
+          //           //       padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 50),
+          //           //       decoration: BoxDecoration(
+          //           //           borderRadius: BorderRadius.circular(15),
+          //           //           color: HexColor("#13192B")
+          //           //       ),
+          //           //       child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 35),
+          //           //     )
+          //           // ),
+          //           // GestureDetector(
+          //           //     onTap: _isShow? (){_pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeIn);}:null,
+          //           //     child: Container(
+          //           //       padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 50),
+          //           //       decoration: BoxDecoration(
+          //           //           borderRadius: BorderRadius.circular(15),
+          //           //           color: HexColor("#000000")
+          //           //       ),
+          //           //       child: Text("Get Started",style: TextStyle(color: HexColor("#f3f4f6")),),
+          //           //     )),
+          //         ],
+          //       ),
+          //     ),
+          //   ),
+          // ),
 
 
 
           //Skip Button
-          Visibility(
-            visible: _isShow,
-            child: AnimatedOpacity(
-              opacity: _isShow?1:0,
-              duration: const Duration(milliseconds: 300),
-              child: Container(
-                alignment: const Alignment(0.9, -0.85),
-                child: GestureDetector(onTap: _isShow?(){_pageController.jumpToPage(4);}:null,child: const Text("Skip", style: TextStyle(fontSize: 16),),),
-              ),
-            ),
-          ),
+          // Visibility(
+          //   visible: _isShow,
+          //   child: AnimatedOpacity(
+          //     opacity: _isShow?1:0,
+          //     duration: const Duration(milliseconds: 300),
+          //     child: Container(
+          //       alignment: const Alignment(0.9, -0.85),
+          //       child: GestureDetector(onTap: _isShow?(){_pageController.jumpToPage(4);}:null,child: const Text("Skip", style: TextStyle(fontSize: 16),),),
+          //     ),
+          //   ),
+          // ),
 
           //SmoothIndicator
-          Visibility(
-            visible: _isShow,
-            child: AnimatedOpacity(
-              opacity: _isShow?1:0,
-              duration: const Duration(milliseconds: 300),
-              child: Container(
-                  alignment: const Alignment(0,-0.95),
-                  child: SmoothPageIndicator(
-                      effect: ExpandingDotsEffect(dotColor: HexColor("#919ebd"),activeDotColor: HexColor("#222A3d"), dotHeight: 7, dotWidth: 10),
-                      controller: _pageController,
-                      count: _pageCount,onDotClicked: _isShow?(e){_pageController.animateToPage(e, duration: const Duration(milliseconds: 500), curve: Curves.easeIn);}:null)),
-            ),
-          ),
+          // Visibility(
+          //   visible: _isShow,
+          //   child: AnimatedOpacity(
+          //     opacity: _isShow?1:0,
+          //     duration: const Duration(milliseconds: 300),
+          //     child: Container(
+          //         alignment: const Alignment(0,-0.95),
+          //         child: SmoothPageIndicator(
+          //             effect: ExpandingDotsEffect(dotColor: HexColor("#919ebd"),activeDotColor: HexColor("#222A3d"), dotHeight: 7, dotWidth: 10),
+          //             controller: _pageController,
+          //             count: _pageCount,onDotClicked: _isShow?(e){_pageController.animateToPage(e, duration: const Duration(milliseconds: 500), curve: Curves.easeIn);}:null)),
+          //   ),
+          // ),
 
         ]);
   }

@@ -13,7 +13,7 @@ import 'package:tradingapp/pages/services/firebase_options.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    name: AppConstants.appName,
+    // name: AppConstants.appName,
     options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(
@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
         AppRoutes.authGate : (context)=> AuthGate(),
         // AppRoutes.signIn: (context)=> SignIn(changeSignIn: changeSignIn),
         // AppRoutes.signUp: (context)=> SignIn(changeSignIn: changeSignIn),
-        AppRoutes.splashScreen : (context)=> GetStartedScreen()
+        // AppRoutes.splashScreen : (context)=> GetStartedScreen()
 
       },
     );
