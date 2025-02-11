@@ -1,15 +1,18 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tradingapp/pages/UI/GetStarted.dart';
 import 'package:tradingapp/pages/auth/AuthGate.dart';
+import 'package:tradingapp/pages/auth/SignIn.dart';
 import 'package:tradingapp/pages/services/AuthService.dart';
 import 'package:tradingapp/pages/services/UserService.dart';
+import 'package:tradingapp/pages/services/constants/constants.dart';
 import 'package:tradingapp/pages/services/firebase_options.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    name: "Trading App",
+    name: AppConstants.appName,
     options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(
@@ -27,9 +30,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Trading App',
+      debugShowCheckedModeBanner: false,
+      title: AppConstants.appName,
       theme: ThemeData(useMaterial3: true,),
-      home: const AuthGate(),
+      initialRoute: AppRoutes.authGate,
+
+      routes: {
+        AppRoutes.authGate : (context)=> AuthGate(),
+        // AppRoutes.signIn: (context)=> SignIn(changeSignIn: changeSignIn),
+        // AppRoutes.signUp: (context)=> SignIn(changeSignIn: changeSignIn),
+        AppRoutes.splashScreen : (context)=> GetStartedScreen()
+
+      },
     );
   }
 }
