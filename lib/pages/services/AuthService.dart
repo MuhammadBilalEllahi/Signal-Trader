@@ -21,8 +21,7 @@ class AuthService extends ChangeNotifier {
 
       AuthCredential credential = GoogleAuthProvider.credential(
           accessToken: googleAuth?.accessToken, idToken: googleAuth?.idToken);
-      UserCredential userCredential =
-          await _firebaseAuth.signInWithCredential(credential);
+      UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
       debugPrint("Google Auth User ${userCredential.user?.displayName}");
     } catch (e) {
       debugPrint("Google Auth Eror $e");

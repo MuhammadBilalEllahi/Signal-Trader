@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tradingapp/pages/auth/OnBoardingScreen.dart';
 import 'package:tradingapp/pages/auth/SignOrSignUp.dart';
 import 'package:tradingapp/pages/root/Layout.dart';
 import 'package:tradingapp/pages/services/UserService.dart';
@@ -37,7 +38,7 @@ class _AuthGateState extends State<AuthGate> {
             if(snapshot.hasData){
               return Layout();
             }else{
-              return SignInOrSign();
+              return OnBoardingScreen();
             }
           })
     );

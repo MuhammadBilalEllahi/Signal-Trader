@@ -3,19 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tradingapp/pages/auth/AuthGate.dart';
 import 'package:tradingapp/pages/services/AuthService.dart';
+import 'package:tradingapp/pages/services/ThemeService.dart';
 import 'package:tradingapp/pages/services/UserService.dart';
 import 'package:tradingapp/pages/services/firebase_options.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    name: "Trading App",
-    options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(
       MultiProvider(providers: [
         ChangeNotifierProvider(create: (create)=>UserService()),
-        ChangeNotifierProvider(create: (create)=>AuthService())
+        ChangeNotifierProvider(create: (create)=>AuthService()),
+        ChangeNotifierProvider(create: (create)=>ThemeService(ThemeMode.light))
       ]
       ,
       child:const MyApp()));
@@ -26,9 +26,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme=Provider.of<ThemeService>(context);
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Trading App',
-      theme: ThemeData(useMaterial3: true,),
+      themeMode: theme.getTheme,
+      theme: theme.getLightTheme(),
       home: const AuthGate(),
     );
   }
