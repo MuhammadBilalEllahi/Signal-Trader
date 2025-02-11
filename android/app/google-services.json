@@ -12,7 +12,20 @@
           "package_name": "com.trading.tradingapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1002153357322-p11g412o7fvpn6vu5ij2b67hb7faboap.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.trading.tradingapp",
+            "certificate_hash": "42aee2b7df3adadbad975d957b2700b41afcfcf5"
+          }
+        },
+        {
+          "client_id": "1002153357322-lof6cq5ijdef1globfml8ggvedv5fgmm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAaP2NAVTcObiNKKIxUKbuLWEGD7blXrHg"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1002153357322-lof6cq5ijdef1globfml8ggvedv5fgmm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

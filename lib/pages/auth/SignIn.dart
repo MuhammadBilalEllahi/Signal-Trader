@@ -23,6 +23,10 @@ class _SignInState extends State<SignIn> {
     Provider.of<AuthService>(context,listen: false).signIn(_emailController.text, _passwordController.text);
   }
 
+  _signInGoogle(){
+    Provider.of<AuthService>(context,listen: false).signInGoogle();
+  }
+
 
 
 
@@ -39,7 +43,8 @@ class _SignInState extends State<SignIn> {
           controller: _passwordController,
         ),
         ElevatedButton(onPressed: ()=>_signIn(), child: Text("Sign in")),
-        TextButton(onPressed: ()=>widget.changeSignIn(), child: Text("Sign Up"))
+        TextButton(onPressed: ()=>widget.changeSignIn(), child: Text("Sign Up")),
+        TextButton(onPressed: ()=>_signInGoogle(), child: Text('Google Auth'))
       ],
     );
   }
