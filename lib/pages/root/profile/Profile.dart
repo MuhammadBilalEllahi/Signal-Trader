@@ -15,16 +15,17 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   _signOut() {
     Provider.of<AuthService>(context, listen: false).signOut();
+    Provider.of<UserService>(context).clearUser();
     Navigator.pushNamedAndRemoveUntil(
-        context, AppRoutes.signIn, (route) => false);
+        context, AppRoutes.authGate, (route) => false);
   }
 
   @override
   Widget build(BuildContext context) {
     final userService = Provider.of<UserService>(context);
-    final email = userService.getUserID();
-    final phone = userService.getUserID();
-    final fingerprint = userService.getUserID();
+    final email = userService.user?.email ?? '';
+    final phone = userService.user?.phoneNumber?? '';
+    final fingerprint = userService.user?.uid ?? '';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -89,7 +90,7 @@ class ProfileListTile extends StatelessWidget {
             padding: const EdgeInsets.only(left: 5),
             child: Text(
               value,
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              style: const TextStyle(fontSize: 13, color: Colors.grey),
             ),
           ),
         ],

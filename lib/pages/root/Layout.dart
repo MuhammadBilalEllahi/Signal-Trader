@@ -14,7 +14,7 @@ class Layout extends StatefulWidget {
 
 class _LayoutState extends State<Layout> {
   int selectedPage = 0;
-  bool isModalVisible = true;
+  bool isModalVisible = false;
   final PageController _pageController = PageController();
 
   _navigateToPage(int index) {

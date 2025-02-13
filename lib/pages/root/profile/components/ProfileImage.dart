@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:tradingapp/pages/services/UserService.dart';
 
 class ProfileImage extends StatefulWidget {
   const ProfileImage({super.key});
@@ -14,6 +16,10 @@ class _ProfileImageState extends State<ProfileImage> {
 
   @override
   Widget build(BuildContext context) {
+
+final userService= Provider.of<UserService>(context);
+    final profileImage = userService.user?.photoURL;
+    final name = userService.user?.displayName?? "Anna Shevchenko";
     return Scaffold(
       backgroundColor: HexColor("#af9f85"),
       body: ListView(
@@ -133,8 +139,19 @@ class _ProfileImageState extends State<ProfileImage> {
                           },
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
-                            child: Image.asset(
-                              "assets/images/user.png",
+                            child:
+                            profileImage != null
+                            ?
+                             Image.network(
+                              profileImage,
+                              width: 250,
+                              height: 290,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const SizedBox(),
+                            )
+                            :  Image.asset(
+                               "assets/images/user.png",
                               width: 250,
                               height: 290,
                               fit: BoxFit.cover,
@@ -152,8 +169,8 @@ class _ProfileImageState extends State<ProfileImage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text(
-                  "Anna Shevchenko",
+                 Text(
+                  name,
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
                 ),
                 Row(
