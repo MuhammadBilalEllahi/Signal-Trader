@@ -78,10 +78,11 @@ class _LayoutState extends State<Layout> {
         // physics: const NeverScrollableScrollPhysics(),
         controller: _pageController,
         children:  const [
+          ProfileImage(),
           Home(),
           SizedBox(),
           SizedBox(),
-          ProfileImage()
+          
         ],
         onPageChanged: (pageIndex){
           _onPageChanged(pageIndex);

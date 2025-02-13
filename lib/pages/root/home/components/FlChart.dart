@@ -187,9 +187,7 @@ class _LineChartSample2State extends State<LineChartSample2> {
           belowBarData: BarAreaData(
             show: true,
             gradient: LinearGradient(
-              colors: gradientColors
-                  .map((color) => color.withValues(alpha: 0.3))
-                  .toList(),
+              colors: gradientColors.map((color) => color.withValues(alpha: 0.3)).toList(),
             ),
           ),
         ),
