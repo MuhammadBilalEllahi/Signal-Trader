@@ -18,7 +18,7 @@ class _LayoutState extends State<Layout> {
   final PageController _pageController = PageController();
 
   _navigateToPage(int index) {
-    if (index == 0) {
+    if (index == 3) {
       _pageController.jumpToPage(index);
       setState(() {
         isModalVisible = !isModalVisible;
