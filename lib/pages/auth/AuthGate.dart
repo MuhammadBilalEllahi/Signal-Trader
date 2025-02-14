@@ -36,6 +36,7 @@ class _AuthGateState extends State<AuthGate> {
               if (snapshot.hasData) {
                 // print("USER DATA is ${snapshot.data}\n\n");
                 Future.microtask(() {
+                  // ignore: use_build_context_synchronously
                   Provider.of<UserService>(context, listen: false)
                       .setUser(snapshot.data);
                 });

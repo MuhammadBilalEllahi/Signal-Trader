@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tradingapp/pages/messages/ChatListScreen.dart';
 import 'package:tradingapp/pages/root/profile/Profile.dart';
 import 'package:tradingapp/pages/root/profile/components/ProfileImage.dart';
 
@@ -49,8 +50,9 @@ class _LayoutState extends State<Layout> {
             controller: _pageController,
             onPageChanged: _onPageChanged,
             children: const [
+              ChatListScreen(),
               Home(),
-              SizedBox(),
+              
               SizedBox(),
               ProfileImage(),
             ],

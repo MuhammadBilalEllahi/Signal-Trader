@@ -4,6 +4,7 @@ class AppConstants {
   static final SplashText splashVal = SplashText();
   static String login= "Login";
   static String alreadyHaveAnAcount= "Already have an \naccount? ";
+  static String messagePage ='Messages';
 }
 
 /// Class for Splash Screen Texts
