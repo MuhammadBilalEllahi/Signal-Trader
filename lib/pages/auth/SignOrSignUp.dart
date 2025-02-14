@@ -25,6 +25,7 @@ class _SignInOrSignState extends State<SignInOrSign> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: _isSignIn?SignIn(changeSignIn: ()=>_changeSignIn()):SignUp(changeSignUp: ()=>_changeSignIn()),
     );
   }

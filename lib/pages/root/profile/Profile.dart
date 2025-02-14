@@ -15,7 +15,7 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   _signOut() {
     Provider.of<AuthService>(context, listen: false).signOut();
-    Provider.of<UserService>(context).clearUser();
+    Provider.of<UserService>(context, listen: false).clearUser();
     Navigator.pushNamedAndRemoveUntil(
         context, AppRoutes.authGate, (route) => false);
   }
