@@ -50,9 +50,8 @@ class _LayoutState extends State<Layout> {
             controller: _pageController,
             onPageChanged: _onPageChanged,
             children: const [
-              ChatListScreen(),
               Home(),
-              
+              ChatListScreen(),
               SizedBox(),
               ProfileImage(),
             ],
