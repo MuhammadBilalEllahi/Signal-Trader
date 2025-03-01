@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tradingapp/pages/signals/components/ShimmerSignalCard.dart';
 import 'package:tradingapp/pages/signals/components/SignalCard.dart';
 import 'package:tradingapp/shared/client/ApiClient.dart';
 import 'package:tradingapp/shared/constants/Constants.dart';
@@ -73,7 +74,13 @@ print("Response Fav $response");
       children: [
         Expanded(
           child: favSignals.isEmpty && isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ?  Column(
+                          children: [
+                            ShimmerSignalCard(120),
+                            ShimmerSignalCard(120),
+                            ShimmerSignalCard(120),
+                          ],
+                        )
               : NotificationListener<ScrollNotification>(
                   onNotification: (scrollNotification) {
                     if (scrollNotification.metrics.pixels ==
@@ -88,7 +95,13 @@ print("Response Fav $response");
                     itemCount: favSignals.length + (hasMore ? 1 : 0),
                     itemBuilder: (context, index) {
                       if (index == favSignals.length) {
-                        return const Center(child: CircularProgressIndicator());
+                        return Column(
+                          children: [
+                            ShimmerSignalCard(200),
+                            ShimmerSignalCard(200),
+                            ShimmerSignalCard(200),
+                          ],
+                        );
                       }
                       return SignalCard(favSignals[index]);
                     },

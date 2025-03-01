@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tradingapp/pages/signals/components/ShimmerSignalCard.dart'; 
 import 'package:tradingapp/pages/signals/components/SignalCard.dart';
 import 'package:tradingapp/shared/client/ApiClient.dart';
 import 'package:tradingapp/shared/constants/Constants.dart';
@@ -12,50 +13,107 @@ class HistoryPage extends StatefulWidget {
 
 class _HistoryPageState extends State<HistoryPage> {
   List<Map<String, dynamic>> history = [];
+  List<Map<String, dynamic>> filteredHistory = []; // Stores search results
   int currentPage = 1;
   bool isLoading = false;
   bool hasMore = true;
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _fetchHistory();
     _scrollController.addListener(_scrollListener);
+    _searchController.addListener(_filterHistory); // Listen for search input
   }
 
-  Future<void> _fetchHistory({bool isLoadMore = false}) async {
-    if (isLoading || !hasMore) return;
+  // Future<void> _fetchHistory({bool isLoadMore = false}) async {
+  //   if (isLoading || !hasMore) return;
 
-    setState(() => isLoading = true);
-    final apiClient = ApiClient();
+  //   setState(() => isLoading = true);
+  //   final apiClient = ApiClient();
 
-    try {
-      final response = await apiClient.get(
-          "${ApiConstants.signalsHistory}?page=$currentPage&pageSize=10");
+  //   try {
+  //     final response = await apiClient.get(
+  //         "${ApiConstants.signalsHistory}?page=$currentPage&pageSize=10");
 
-      if (response != null &&
-          response.containsKey("history") &&
-          response["history"] is List) {
-        List<Map<String, dynamic>> newHistory =
-            List<Map<String, dynamic>>.from(response["history"]);
+  //     if (response != null &&
+  //         response.containsKey("history") &&
+  //         response["history"] is List) {
+  //       List<Map<String, dynamic>> newHistory =
+  //           List<Map<String, dynamic>>.from(response["history"]);
 
-        setState(() {
-          if (isLoadMore) {
+  //       setState(() {
+  //         if (isLoadMore) {
+  //           history.addAll(newHistory);
+  //         } else {
+  //           history = newHistory;
+  //         }
+
+  //         hasMore = response["hasMore"] ?? false;
+  //         if (hasMore) currentPage++;
+
+  //         _filterHistory(); // Apply filter after fetching data
+  //       });
+  //     }
+  //   } catch (e) {
+  //     debugPrint("Error fetching history: $e");
+  //   } finally {
+  //     setState(() => isLoading = false);
+  //   }
+  // }
+
+Future<void> _fetchHistory({bool isLoadMore = false}) async {
+  if (isLoading || !hasMore) return;
+
+  setState(() => isLoading = true);
+  final apiClient = ApiClient();
+
+  try {
+    final response = await apiClient.get(
+        "${ApiConstants.signalsHistory}?pageId=$currentPage&pageSize=10");
+
+    if (response != null &&
+        response.containsKey("history") &&
+        response["history"] is List) {
+      List<Map<String, dynamic>> newHistory =
+          List<Map<String, dynamic>>.from(response["history"]);
+
+debugPrint("\n\nREsponse $response");
+      setState(() {
+        if (isLoadMore) {
+          if (newHistory.isNotEmpty) {
             history.addAll(newHistory);
+            currentPage++; // Increase only if new data is received
           } else {
-            history = newHistory;
+            hasMore = false; // Stop further requests
           }
+        } else {
+          history = newHistory;
+          currentPage = 2; // Reset to second page when fetching fresh data
+        }
 
-          hasMore = response["hasMore"] ?? false;
-          if (hasMore) currentPage++;
-        });
-      }
-    } catch (e) {
-      debugPrint("Error fetching history: $e");
-    } finally {
-      setState(() => isLoading = false);
+        hasMore = response["hasMore"] ?? false;
+        _filterHistory();
+      });
+    } else {
+      setState(() => hasMore = false); // No more data
     }
+  } catch (e) {
+    debugPrint("Error fetching history: $e");
+  } finally {
+    setState(() => isLoading = false);
+  }
+}
+
+  void _filterHistory() {
+    String query = _searchController.text.toLowerCase();
+    setState(() {
+      filteredHistory = history.where((signal) {
+        return signal["coin"].toLowerCase().contains(query);
+      }).toList();
+    });
   }
 
   void _scrollListener() {
@@ -73,6 +131,7 @@ class _HistoryPageState extends State<HistoryPage> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: TextField(
+            controller: _searchController, // Attach search controller
             decoration: InputDecoration(
               hintText: "Search history...",
               prefixIcon: const Icon(Icons.search),
@@ -83,8 +142,12 @@ class _HistoryPageState extends State<HistoryPage> {
           ),
         ),
         Expanded(
-          child: history.isEmpty && isLoading
-              ? const Center(child: CircularProgressIndicator())
+          child: filteredHistory.isEmpty && isLoading
+              ? Column( children: [
+                            ShimmerSignalCard(120),
+                            ShimmerSignalCard(120),
+                            ShimmerSignalCard(120),
+                          ],)
               : NotificationListener<ScrollNotification>(
                   onNotification: (scrollNotification) {
                     if (scrollNotification.metrics.pixels ==
@@ -96,12 +159,18 @@ class _HistoryPageState extends State<HistoryPage> {
                   },
                   child: ListView.builder(
                     controller: _scrollController,
-                    itemCount: history.length + (hasMore ? 1 : 0),
+                    itemCount: filteredHistory.length + (hasMore ? 1 : 0),
                     itemBuilder: (context, index) {
-                      if (index == history.length) {
-                        return const Center(child: CircularProgressIndicator());
+                      if (index == filteredHistory.length) {
+                        return Column(
+                           children: [
+                            ShimmerSignalCard(120),
+                            ShimmerSignalCard(120),
+                            ShimmerSignalCard(120),
+                          ],
+                        );
                       }
-                      return SignalCard(history[index]);
+                      return SignalCard(filteredHistory[index]);
                     },
                   ),
                 ),
@@ -110,81 +179,3 @@ class _HistoryPageState extends State<HistoryPage> {
     );
   }
 }
-
-
-// import 'package:flutter/material.dart';
-// import 'package:tradingapp/pages/signals/components/SignalCard.dart';
-// import 'package:tradingapp/shared/client/ApiClient.dart';
-// import 'package:tradingapp/shared/constants/Constants.dart';
-
-// class HistoryPage extends StatefulWidget {
-//   const HistoryPage({super.key});
-
-//   @override
-//   State<HistoryPage> createState() => _HistoryPageState();
-// }
-
-// class _HistoryPageState extends State<HistoryPage> {
-
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     getSignalHistory();
-//   }
-//   Future<List<dynamic>> getSignalHistory() async {
-
-//     final apiClient = ApiClient();
-//         debugPrint("🔹 Sending GET request to: ${ApiConstants.baseUrl}${ApiConstants.signalsHistory}");
-
-//     final response = await apiClient.get(ApiConstants.signalsHistory);
-//     debugPrint("REPS $response");
-//     return response is List ? response : []; // Ensure it's a list
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       children: [
-//         Padding(
-//           padding: const EdgeInsets.all(8.0),
-//           child: TextField(
-//             decoration: InputDecoration(
-//               hintText: "Search history...",
-//               prefixIcon: const Icon(Icons.search),
-//               border: OutlineInputBorder(
-//                 borderRadius: BorderRadius.circular(10),
-//               ),
-//             ),
-//           ),
-//         ),
-//         Expanded(
-//           child: FutureBuilder<List<dynamic>>(
-//             future: getSignalHistory(), // Fetch data asynchronously
-//             builder: (context, snapshot) {
-//               if (snapshot.connectionState == ConnectionState.waiting) {
-//                 return const Center(child: CircularProgressIndicator()); // Show loader
-//               }
-//               if (snapshot.hasError) {
-//                 return const Center(child: Text("Error loading history")); // Handle error
-//               }
-//               final signals = snapshot.data ?? []; // Ensure it's a list
-
-//               if (signals.isEmpty) {
-//                 return const Center(child: Text("No history available")); // Show empty state
-//               }
-
-//               return ListView.builder(
-//                 itemCount: signals.length,
-//                 itemBuilder: (context, index) {
-//                   return SignalCard(signals[index]); // Pass data to SignalCard
-//                 },
-//               );
-//             },
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-// }
-
