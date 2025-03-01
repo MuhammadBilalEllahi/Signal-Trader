@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tradingapp/admin/pages/AdminDashboard.dart';
 import 'package:tradingapp/pages/messages/ChatListScreen.dart';
 import 'package:tradingapp/pages/root/profile/Profile.dart';
 import 'package:tradingapp/pages/root/profile/components/ProfileImage.dart';
+import 'package:tradingapp/pages/signals/SignalsPage.dart';
 
 import 'home/Home.dart';
 
@@ -50,10 +52,13 @@ class _LayoutState extends State<Layout> {
             controller: _pageController,
             onPageChanged: _onPageChanged,
             children: const [
-              Home(),
+              AdminDashboard(),
+              SignalsPage(),
+              // Home(),
               ChatListScreen(),
-              SizedBox(),
+              
               ProfileImage(),
+              
             ],
           ),
           AnimatedPositioned(
@@ -64,7 +69,7 @@ class _LayoutState extends State<Layout> {
             child: Container(
               height: 300,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).canvasColor,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
               ),
               child: const Profile(),
@@ -87,9 +92,9 @@ class _LayoutState extends State<Layout> {
               label: "Chat",
               activeIcon: Icon(CupertinoIcons.chat_bubble_text_fill)),
           BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.smiley),
+              icon: Icon(CupertinoIcons.chart_bar_alt_fill),
               label: "Trends",
-              activeIcon: Icon(CupertinoIcons.smiley_fill)),
+              activeIcon: Icon(CupertinoIcons.chart_bar_alt_fill)),
           BottomNavigationBarItem(
               icon: Icon(Icons.person_outline_sharp),
               label: "Profile",

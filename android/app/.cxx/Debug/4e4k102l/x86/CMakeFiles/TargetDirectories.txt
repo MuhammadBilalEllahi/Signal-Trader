@@ -1,0 +1,2 @@
+D:/Projects/Group Freelance Projects/Trading App/Trading-App-FrontEnd/android/app/.cxx/Debug/4e4k102l/x86/CMakeFiles/edit_cache.dir
+D:/Projects/Group Freelance Projects/Trading App/Trading-App-FrontEnd/android/app/.cxx/Debug/4e4k102l/x86/CMakeFiles/rebuild_cache.dir

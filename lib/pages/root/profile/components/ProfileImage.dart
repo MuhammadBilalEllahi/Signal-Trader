@@ -21,7 +21,7 @@ final userService= Provider.of<UserService>(context);
     final profileImage = userService.user?.photoURL;
     final name = userService.user?.displayName?? "Anna Shevchenko";
     return Scaffold(
-      backgroundColor: HexColor("#af9f85"),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: ListView(
         children: [
           const SizedBox(height: 25),
@@ -71,7 +71,7 @@ final userService= Provider.of<UserService>(context);
                       width: 250,
                       height: 265,
                       decoration: BoxDecoration(
-                        color: Colors.black,
+                        color: Theme.of(context).listTileTheme.tileColor,
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
@@ -86,7 +86,7 @@ final userService= Provider.of<UserService>(context);
                       width: 150,
                       height: 265,
                       decoration: BoxDecoration(
-                        color: Colors.black,
+                        color: Theme.of(context).listTileTheme.tileColor,
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
@@ -186,7 +186,7 @@ final userService= Provider.of<UserService>(context);
                       icon: const Icon(
                         Icons.file_upload_outlined,
                         size: 22,
-                        color: Colors.black,
+                        
                       ),
                     )
                   ],

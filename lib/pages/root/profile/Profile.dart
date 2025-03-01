@@ -30,6 +30,7 @@ class _ProfileState extends State<Profile> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: ListView(
+        
         children: [
           ProfileListTile(
             title: 'Phone Number',
@@ -80,7 +81,7 @@ class ProfileListTile extends StatelessWidget {
       leading: Icon(icon, size: 36, color: Colors.grey),
       title: Text(
         title,
-        style: const TextStyle(fontSize: 15, color: Colors.black),
+        style: const TextStyle(fontSize: 15, color: Colors.grey),
       ),
       subtitle: Row(
         crossAxisAlignment: CrossAxisAlignment.center,

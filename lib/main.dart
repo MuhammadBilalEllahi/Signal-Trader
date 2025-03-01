@@ -9,6 +9,7 @@ import 'package:tradingapp/pages/services/AuthService.dart';
 import 'package:tradingapp/pages/services/ThemeService.dart';
 import 'package:tradingapp/pages/services/UserService.dart';
 import 'package:tradingapp/pages/services/constants/constants.dart';
+import 'package:tradingapp/theme/theme.dart';
 // import 'package:tradingapp/pages/services/firebase_options.dart';
 
 void main() async{
@@ -32,12 +33,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme=Provider.of<ThemeService>(context);
+    
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: AppConstants.appName,
-      themeMode: theme.getTheme,
-      theme: theme.getLightTheme(),
+      theme: MyTheme.lightTheme,
+      darkTheme: MyTheme.darkTheme,
+
       initialRoute: AppRoutes.authGate,
 
       routes: {
