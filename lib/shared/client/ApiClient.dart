@@ -25,7 +25,7 @@ class ApiClient {
     try {
       final defaultHeaders = {"x-platform": "app"};
       String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
-      debugPrint("$endpoint $token ");
+      debugPrint("$endpoint POST $token ");
 
       // Merge default headers with any provided custom headers
       final mergedHeaders = {
@@ -58,6 +58,7 @@ class ApiClient {
       // print("Ae $endpoint");
       final defaultHeaders = {"x-platform": "app"};
       String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
+      debugPrint("$endpoint GET $token ");
 
       // Merge default headers with any provided custom headers
       final mergedHeaders = {
@@ -77,6 +78,7 @@ class ApiClient {
 
       // print(endpoint);
       // print("$response");
+      debugPrint("$endpoint GET response $response ");
 
       return response.data as T;
     } catch (e) {
