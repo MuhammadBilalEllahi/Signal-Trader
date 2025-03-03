@@ -7,6 +7,7 @@ class ApiConstants {
   // static String baseUrl = 'http://10.0.2.2:4000/';
 
   static String signals = 'signals';
+  static String adminCreateSignal = 'signals/admin/create';
     static String signalsHistory = 'signals/history';
     static String signalsFavourite = 'signals/favourite';
         static String signalsFavourites = 'signals/favorites';
