@@ -210,7 +210,7 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
                     controller: _scrollController,
                     child: Row(
   children: [
-    ...signals.map((signal) => SignalCard(signal)),
+    ...signals.map((signal) => SignalCard(signal, showAnalysis: true)),
     if (isLoading) ...[
       ShimmerSignalCard(500),
       ShimmerSignalCard(500),
