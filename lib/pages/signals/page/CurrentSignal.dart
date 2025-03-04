@@ -26,6 +26,21 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
   bool isLoading = false;
   bool hasMore = true;
 
+  // Filter state variables
+  String selectedType = 'all';
+  String selectedCoin = '';
+  String selectedDirection = 'all';
+  RangeValues entryPriceRange = const RangeValues(0, 100000);
+  RangeValues exitPriceRange = const RangeValues(0, 100000);
+  bool showFilterDialog = false;
+
+  // Applied filter state variables
+  String appliedType = 'all';
+  String appliedCoin = '';
+  String appliedDirection = 'all';
+  RangeValues appliedEntryPriceRange = const RangeValues(0, 100000);
+  RangeValues appliedExitPriceRange = const RangeValues(0, 100000);
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +67,46 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
   Future<void> _saveViewPreference(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isVertical', value);
+  }
+
+  void _resetFilters() {
+    setState(() {
+      selectedType = 'all';
+      selectedCoin = '';
+      selectedDirection = 'all';
+      selectedType = 'all';
+      entryPriceRange = const RangeValues(0, 100000);
+      exitPriceRange = const RangeValues(0, 100000);
+      
+      // Also reset applied filters
+      appliedType = 'all';
+      appliedCoin = '';
+      appliedDirection = 'all';
+      appliedEntryPriceRange = const RangeValues(0, 100000);
+      appliedExitPriceRange = const RangeValues(0, 100000);
+    });
+  }
+
+  void _applyFilters() {
+    setState(() {
+      appliedType = selectedType;
+      appliedCoin = selectedCoin;
+      appliedDirection = selectedDirection;
+      appliedEntryPriceRange = entryPriceRange;
+      appliedExitPriceRange = exitPriceRange;
+    });
+  }
+
+  List<Map<String, dynamic>> getFilteredSignals() {
+    return signals.where((signal) {
+      bool typeMatch = appliedType == 'all' || signal['type'] == appliedType;
+      bool coinMatch = appliedCoin.isEmpty || signal['coin'].toString().toLowerCase().contains(appliedCoin.toLowerCase());
+      bool directionMatch = appliedDirection == 'all' || signal['direction'].toString().toLowerCase() == appliedDirection;
+      bool entryPriceMatch = signal['entryPrice'] >= appliedEntryPriceRange.start && signal['entryPrice'] <= appliedEntryPriceRange.end;
+      bool exitPriceMatch = signal['exitPrice'] >= appliedExitPriceRange.start && signal['exitPrice'] <= appliedExitPriceRange.end;
+      
+      return typeMatch && coinMatch && directionMatch && entryPriceMatch && exitPriceMatch;
+    }).toList();
   }
 
   Future<void> _fetchPaginatedSignals({bool isLoadMore = false}) async {
@@ -117,7 +172,7 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
   }
 
   void _scrollToIndex(int index) {
-    double offset = index * MediaQuery.of(context).size.width;
+    double offset = index * MediaQuery.of(context).size.width ;
     _scrollController.animateTo(
       offset,
       duration: const Duration(milliseconds: 300),
@@ -131,6 +186,11 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
         !isLoading) {
       _fetchPaginatedSignals(isLoadMore: true);
     }
+    
+    // Update current index based on scroll position
+    setState(() {
+      currentIndex = (_scrollController.position.pixels / MediaQuery.of(context).size.width).round();
+    });
   }
 
   void _handleNext() {
@@ -155,23 +215,220 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
     }
   }
 
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              
+              title: const Text('Filter Signals'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    DropdownButton<String>(
+                      value: selectedType,
+                      isExpanded: true,
+                      items: const [
+                        DropdownMenuItem(value: 'all', child: Text('All Types')),
+                        DropdownMenuItem(value: 'gold', child: Text('Gold')),
+                        DropdownMenuItem(value: 'stocks', child: Text('Stocks')),
+                        DropdownMenuItem(value: 'crypto', child: Text('Crypto')),
+                      ],
+                      onChanged: (value) {
+                        setState(() => selectedType = value!);
+                      },
+                    ),
+                    TextField(
+                      decoration: const InputDecoration(
+                        labelText: 'Search by Coin',
+                      ),
+                      onChanged: (value) {
+                        setState(() => selectedCoin = value);
+                      },
+                    ),
+                    DropdownButton<String>(
+                      value: selectedDirection,
+                      isExpanded: true,
+                      items: const [
+                        DropdownMenuItem(value: 'all', child: Text('All Directions')),
+                        DropdownMenuItem(value: 'long', child: Text('Long')),
+                        DropdownMenuItem(value: 'short', child: Text('Short')),
+                      ],
+                      onChanged: (value) {
+                        setState(() => selectedDirection = value!);
+                      },
+                    ),
+                    const Text('Entry Price Range'),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Entry Price Range', style: TextStyle(fontWeight: FontWeight.w500)),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                decoration: const InputDecoration(
+                                  labelText: 'Min Price',
+                                  prefixText: '\$',
+                                  border: OutlineInputBorder(),
+                                ),
+                                keyboardType: TextInputType.number,
+                                onChanged: (value) {
+                                  final minPrice = double.tryParse(value) ?? 0;
+                                  setState(() {
+                                    entryPriceRange = RangeValues(
+                                      minPrice,
+                                      entryPriceRange.end,
+                                    );
+                                  });
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: TextField(
+                                decoration: const InputDecoration(
+                                  labelText: 'Max Price',
+                                  prefixText: '\$',
+                                  border: OutlineInputBorder(),
+                                ),
+                                keyboardType: TextInputType.number,
+                                onChanged: (value) {
+                                  final maxPrice = double.tryParse(value) ?? 100000;
+                                  setState(() {
+                                    entryPriceRange = RangeValues(
+                                      entryPriceRange.start,
+                                      maxPrice,
+                                    );
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('Exit Price Range', style: TextStyle(fontWeight: FontWeight.w500)),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                decoration: const InputDecoration(
+                                  labelText: 'Min Price',
+                                  prefixText: '\$',
+                                  border: OutlineInputBorder(),
+                                ),
+                                keyboardType: TextInputType.number,
+                                onChanged: (value) {
+                                  final minPrice = double.tryParse(value) ?? 0;
+                                  setState(() {
+                                    exitPriceRange = RangeValues(
+                                      minPrice,
+                                      exitPriceRange.end,
+                                    );
+                                  });
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: TextField(
+                                decoration: const InputDecoration(
+                                  labelText: 'Max Price',
+                                  prefixText: '\$',
+                                  border: OutlineInputBorder(),
+                                ),
+                                keyboardType: TextInputType.number,
+                                onChanged: (value) {
+                                  final maxPrice = double.tryParse(value) ?? 100000;
+                                  setState(() {
+                                    exitPriceRange = RangeValues(
+                                      exitPriceRange.start,
+                                      maxPrice,
+                                    );
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    _resetFilters();
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Reset'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    _applyFilters();
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Apply'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  List<int> _getVisibleIndices(int currentIndex, int totalLength) {
+    int start = currentIndex - 2;
+    int end = currentIndex + 2;
+    
+    if (start < 0) {
+      start = 0;
+      end = start + 4;
+    }
+    
+    if (end >= totalLength) {
+      end = totalLength - 1;
+      start = end - 4;
+    }
+    
+    if (start < 0) start = 0;
+    
+    return List.generate(end - start + 1, (index) => start + index);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final filteredSignals = getFilteredSignals();
+    
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            IconButton(
-              icon: Icon(isVertical ? Icons.view_array : Icons.calendar_view_day_rounded),
-              onPressed: () {
-                setState(() {
-                  isVertical = !isVertical;
-                  _saveViewPreference(isVertical);
-                });
-              },
-            ),
-          ],
+        Padding(
+          padding: const EdgeInsets.only(right: 7),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.filter_list),
+                onPressed: _showFilterDialog,
+              ),
+              IconButton(
+                icon: Icon(isVertical ? Icons.view_array : Icons.calendar_view_day_rounded),
+                onPressed: () {
+                  setState(() {
+                    isVertical = !isVertical;
+                    _saveViewPreference(isVertical);
+                  });
+                },
+              ),
+            ],
+          ),
         ),
         Expanded(
           child: isVertical
@@ -184,15 +441,14 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
                     return false;
                   },
                   child: ListView.builder(
-                    itemCount: signals.length + (hasMore ? 1 : 0),
+                    itemCount: filteredSignals.length + (hasMore ? 1 : 0),
                     itemBuilder: (context, index) {
-                      if (index == signals.length) {
-                        return  Column(
-                          children: [ShimmerSignalCard(100),ShimmerSignalCard(100),ShimmerSignalCard(100)],
-                          
+                      if (index == filteredSignals.length) {
+                        return Column(
+                          children: [ShimmerSignalCard(100), ShimmerSignalCard(100), ShimmerSignalCard(100)],
                         );
                       }
-                      return SignalCard(signals[index]);
+                      return SignalCard(filteredSignals[index]);
                     },
                   ),
                 )
@@ -209,20 +465,19 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
                     scrollDirection: Axis.horizontal,
                     controller: _scrollController,
                     child: Row(
-  children: [
-    ...signals.map((signal) => SignalCard(signal, showAnalysis: true)),
-    if (isLoading) ...[
-      ShimmerSignalCard(500),
-      ShimmerSignalCard(500),
-      ShimmerSignalCard(500),
-    ],
-  ],
-),
-
+                      children: [
+                        ...filteredSignals.map((signal) => SignalCard(signal, showAnalysis: true)),
+                        if (isLoading) ...[
+                          ShimmerSignalCard(600),
+                          ShimmerSignalCard(600),
+                          ShimmerSignalCard(600),
+                        ],
+                      ],
+                    ),
                   ),
                 ),
         ),
-        if (!isVertical)
+        if (!isVertical) ...[
           Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -231,14 +486,34 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
                 onPressed: _handlePrev,
                 child: const Text("Prev"),
               ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: _getVisibleIndices(currentIndex, filteredSignals.length)
+                    .map((index) =>  TextButton(
+                            onPressed: () => _scrollToIndex(index),
+                            style: TextButton.styleFrom(
+                              backgroundColor: currentIndex == index ? Colors.yellow : Colors.transparent,
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              minimumSize: const Size(0, 0),
+                            ),
+                            child: Text(
+                              '${index + 1}',
+                              style: TextStyle(
+                                color: currentIndex == index ?   Colors.black: Colors.white,
+                              ),
+                            ),
+                        
+                        ))
+                    .toList(),
+              ),
               TextButton(
                 onPressed: _handleNext,
                 child: const Text("Next"),
               ),
             ],
           ),
-        if (!isVertical)
           const SizedBox(height: 20),
+        ],
       ],
     );
   }

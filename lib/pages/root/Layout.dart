@@ -21,7 +21,7 @@ class _LayoutState extends State<Layout> {
   final PageController _pageController = PageController();
 
   _navigateToPage(int index) {
-    if (index == 3) {
+    if (index == 4) {
       _pageController.jumpToPage(index);
       setState(() {
         isModalVisible = !isModalVisible;
@@ -53,11 +53,10 @@ class _LayoutState extends State<Layout> {
             onPageChanged: _onPageChanged,
             children: const [
               SignalsPage(),
-              AdminDashboard(),
-              
-              // Home(),
+              // AdminDashboard(),
+              SizedBox(),
+              Home(),
               ChatListScreen(),
-              
               ProfileImage(),
               
             ],
@@ -85,6 +84,14 @@ class _LayoutState extends State<Layout> {
         },
         items: const [
           BottomNavigationBarItem(
+              icon: Icon(CupertinoIcons.chart_bar_alt_fill),
+              label: "Signals",
+              activeIcon: Icon(CupertinoIcons.chart_bar_alt_fill)),
+              BottomNavigationBarItem(
+              icon: Icon(CupertinoIcons.news),
+              label: "News/Updates",
+              activeIcon: Icon(CupertinoIcons.news_solid)),
+          BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
               label: "Home",
               activeIcon: Icon(Icons.home)),
@@ -92,10 +99,7 @@ class _LayoutState extends State<Layout> {
               icon: Icon(CupertinoIcons.chat_bubble_text),
               label: "Chat",
               activeIcon: Icon(CupertinoIcons.chat_bubble_text_fill)),
-          BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.chart_bar_alt_fill),
-              label: "Trends",
-              activeIcon: Icon(CupertinoIcons.chart_bar_alt_fill)),
+          
           BottomNavigationBarItem(
               icon: Icon(Icons.person_outline_sharp),
               label: "Profile",

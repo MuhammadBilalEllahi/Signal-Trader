@@ -45,7 +45,7 @@ class _SignalCardState extends State<SignalCard> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: MediaQuery.of(context).size.width * 0.95,
+      width: MediaQuery.of(context).size.width ,
       child: Card(
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -61,10 +61,10 @@ class _SignalCardState extends State<SignalCard> {
                 children: [
                   Row(
                     children: [
-                      Text(widget.signal["coin"],
+                    if(widget.signal["type"] != "gold")   Text(widget.signal["coin"],
                           style: const TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold)),
-                      if(widget.signal["type"] != "gold") Container(
+                      if(widget.signal["type"] == "gold") Container(
                         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
                         margin: const EdgeInsets.only(left: 8),
                         decoration: BoxDecoration(
@@ -416,7 +416,7 @@ class _SignalCardState extends State<SignalCard> {
                     const SizedBox(height: 12),
                     LayoutBuilder(
                       builder: (context, constraints) {
-                        final text = widget.signal["analysis"] ?? "No analysis available for this signal.";
+                        final text = widget.signal["hasTradingAnalysis"] ? widget.signal["tradingAnalysis"] : "No analysis available for this signal.";
                         final textSpan = TextSpan(
                           text: text,
                           style: TextStyle(
