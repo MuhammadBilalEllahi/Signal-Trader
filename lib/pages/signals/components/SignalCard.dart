@@ -134,7 +134,7 @@ class _SignalCardState extends State<SignalCard> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     Widget cardContent = Column(
-      mainAxisSize: MainAxisSize.min,
+      // mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(

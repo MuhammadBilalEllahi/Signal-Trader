@@ -4,6 +4,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:tradingapp/pages/signals/page/CurrentSignal.dart';
 import 'package:tradingapp/pages/signals/page/FavouritesPage.dart';
 import 'package:tradingapp/pages/signals/page/HistoryPage.dart';
+import 'package:tradingapp/pages/signals/components/TradingTypeSwitch.dart';
 
 class SignalsPage extends StatefulWidget {
   const SignalsPage({super.key});
@@ -14,21 +15,33 @@ class SignalsPage extends StatefulWidget {
 
 class _SignalsPageState extends State<SignalsPage> {
   int _selectedTab = 0;
+  bool _isSpotSelected = true;
+  final bool _hasFuturesAccess = false; // This should come from your user's subscription status
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(
-          "Trading Signals",
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Trading Signals",
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            TradingTypeSwitch(
+              hasFuturesAccess: _hasFuturesAccess,
+              isSpotSelected: _isSpotSelected,
+              onSpotSelected: (isSpot) {
+                setState(() => _isSpotSelected = isSpot);
+              },
+            ),
+          ],
         ),
-        centerTitle: true,
+        centerTitle: false,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
       ),
