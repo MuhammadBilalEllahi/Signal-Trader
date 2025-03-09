@@ -49,9 +49,22 @@ class _SignalsPageState extends State<SignalsPage> {
       onPressed: () => setState(() => _selectedTab = index),
       style: ElevatedButton.styleFrom(
         backgroundColor: _selectedTab == index
-            ? Theme.of(context).primaryColor
-            : Colors.grey,
-        foregroundColor: Colors.black,
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.surface,
+        foregroundColor: _selectedTab == index
+            ? Theme.of(context).colorScheme.onPrimary
+            : Theme.of(context).colorScheme.onSurface,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+          side: BorderSide(
+            color: _selectedTab == index
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).dividerTheme.color ?? Colors.transparent,
+            width: 1,
+          ),
+        ),
       ),
       child: Text(title),
     );

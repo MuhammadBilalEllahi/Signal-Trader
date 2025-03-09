@@ -13,49 +13,175 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  bool _isLoading = false;
+  bool _hasError = false;
+  String _errorMessage = '';
+
+  void _retryLoad() {
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+      _errorMessage = '';
+    });
+
+    // Simulate loading
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
+  }
+
+  Widget _buildContent() {
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      children: [
+        const SizedBox(height: 24),
+        Card(
+          child: ListTile(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+            leading: Icon(
+              Icons.verified,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            title: Text(
+              "Apply for verification",
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            trailing: OutlinedButton(
+              onPressed: () {},
+              child: const Text("Apply"),
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          "Metrics",
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Homebuttons(
+              onTap: () {},
+              icon: Icons.money_sharp,
+              isActive: true,
+              text: "Payments",
+            ),
+            Homebuttons(
+              onTap: () {},
+              icon: Icons.arrow_forward,
+              text: "Send",
+            ),
+            Homebuttons(
+              onTap: () {},
+              icon: Icons.people,
+              text: "Peers",
+            ),
+            Homebuttons(
+              onTap: () {},
+              icon: Icons.more_horiz_outlined,
+              text: "More",
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Activity",
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const SizedBox(
+                  height: 200,
+                  child: LineChartSample2(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildErrorWidget() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 48,
+            color: Theme.of(context).colorScheme.error,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _errorMessage.isNotEmpty
+                ? _errorMessage
+                : 'Something went wrong. Please try again.',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: _retryLoad,
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingWidget() {
+    return Center(
+      child: CircularProgressIndicator(
+        color: Theme.of(context).colorScheme.primary,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        padding: EdgeInsets.symmetric(horizontal: 10),
-        children: [
-          SizedBox(height: 25),
-          ListTile(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10)
+      appBar: AppBar(
+        title: Text(
+          AppConstants.appName,
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        centerTitle: true,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Badge(
+              child: Icon(
+                Icons.notifications_none_outlined,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
-             tileColor: Theme.of(context).listTileTheme.tileColor,
-            leading: Icon(Icons.verified),
-            title: Text("Apply for verification"),
-            trailing: OutlinedButton(onPressed: (){}, child: Text("Apply", style: TextStyle(color: Theme.of(context).listTileTheme.leadingAndTrailingTextStyle!.color)),
-          )),
-          SizedBox(height: 10),
-          Text("Metrics", style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),),
-          SizedBox(height: 10),
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Homebuttons(onTap: (){}, icon: Icons.money_sharp, isActive: true, text: "Payments",),
-              Homebuttons(onTap: (){}, icon: Icons.arrow_forward,  text: "Send",),
-              Homebuttons(onTap: (){}, icon: Icons.people,  text: "Peers",),
-              Homebuttons(onTap: (){}, icon: Icons.more_horiz_outlined, text: "More",)
-            ],
           ),
-          SizedBox(height: 10,),
-          LineChartSample2()
         ],
       ),
-      appBar: AppBar(title: Text(AppConstants.appName),centerTitle: true,
-      actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 10),
-          child: Badge(
-            child: Icon(Icons.notifications_none_outlined),
-          ),
-        )
-      ]),
+      body: _hasError
+          ? _buildErrorWidget()
+          : _isLoading
+              ? _buildLoadingWidget()
+              : _buildContent(),
     );
   }
 }

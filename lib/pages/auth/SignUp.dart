@@ -1,8 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
-
 import '../services/AuthService.dart';
 
 class SignUp extends StatefulWidget {
@@ -18,52 +16,129 @@ class _SignUpState extends State<SignUp> {
   final TextEditingController _passwordController = TextEditingController();
   late bool _showPassword = false;
 
-
-  _signUp(){
-    if(_emailController.text.isEmpty||_passwordController.text.isEmpty){
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Enter Email and Password")));
+  void _signUp() {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Please enter both email and password"),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
       return;
     }
-    Provider.of<AuthService>(context,listen: false).signUp(_emailController.text, _passwordController.text);
+    Provider.of<AuthService>(context, listen: false)
+        .signUp(_emailController.text, _passwordController.text);
   }
-
-
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: EdgeInsets.symmetric(horizontal: 10),
-      children: [
-        TextField(
-            cursorColor: Theme.of(context).textTheme.bodySmall!.color,
-            style: Theme.of(context).textTheme.bodyMedium,
-            onSubmitted: (e)=>_signUp(),
-            controller: _emailController,
-            decoration: InputDecoration(
-              prefixIcon: Icon(Icons.alternate_email_outlined),
-              hintText: "email",
-            )),
-        SizedBox(height: 10),
-        TextField(
-            cursorColor: Theme.of(context).textTheme.bodySmall!.color,
-            style: Theme.of(context).textTheme.bodyMedium,
-            onSubmitted: (e)=>_signUp(),
-            controller: _passwordController,
-            obscureText: !_showPassword,
-            decoration: InputDecoration(
-              prefixIcon: Icon(Icons.password),
-              suffixIcon: IconButton(onPressed: (){setState(() {_showPassword=!_showPassword;});}, icon: _showPassword ? const Icon(CupertinoIcons.eye_slash_fill) : const Icon(CupertinoIcons.eye_fill)),
-              hintText: "Password",
-            )),
-        SizedBox(height: 25),
-        ElevatedButton(onPressed: ()=>_signUp(), child: Text("Sign up")),
-        const SizedBox(height: 25),
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text("Already have an account?", style: TextStyle(color: Theme.of(context).textTheme.bodySmall!.color,fontWeight: FontWeight.w400),),
-          const SizedBox(width: 4),
-          GestureDetector(onTap: ()=>widget.changeSignUp(), child: Text("Sign In", style: TextStyle(fontWeight: FontWeight.w400, color: HexColor("#f7cf56")))),
-        ]),
-      ],
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 48),
+            Text(
+              "Create an account",
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Enter your details to get started",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 32),
+            // Email Input
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 2, bottom: 8),
+                  child: Text(
+                    "Email",
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                TextField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    hintText: "name@example.com",
+                    prefixIcon: Icon(
+                      Icons.email_outlined,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            // Password Input
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 2, bottom: 8),
+                  child: Text(
+                    "Password",
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: !_showPassword,
+                  decoration: InputDecoration(
+                    hintText: "Create a password",
+                    prefixIcon: Icon(
+                      Icons.lock_outline,
+                      size: 20,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _showPassword
+                            ? CupertinoIcons.eye_slash
+                            : CupertinoIcons.eye,
+                        size: 20,
+                      ),
+                      onPressed: () => setState(() => _showPassword = !_showPassword),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _signUp,
+                child: Text("Create account"),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Already have an account? ",
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                TextButton(
+                  onPressed: widget.changeSignUp,
+                  child: Text("Sign in"),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
