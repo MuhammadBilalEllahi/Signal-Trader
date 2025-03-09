@@ -171,13 +171,13 @@ class _SignalCardState extends State<SignalCard> {
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                   decoration: BoxDecoration(
                     color: widget.signal['direction'].toString().toLowerCase() == 'long'
-                        ? Colors.green.withOpacity(isDark ? 0.2 : 0.1)
-                        : Colors.red.withOpacity(isDark ? 0.2 : 0.1),
+                        ? Colors.green.withOpacity(isDark ? 0.1 : 0.05)
+                        : Colors.red.withOpacity(isDark ? 0.1 : 0.05),
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: widget.signal['direction'].toString().toLowerCase() == 'long'
-                          ? Colors.green.withOpacity(0.5)
-                          : Colors.red.withOpacity(0.5),
+                          ? Colors.green.withOpacity(0.3)
+                          : Colors.red.withOpacity(0.3),
                       width: 1,
                     ),
                   ),
@@ -185,8 +185,8 @@ class _SignalCardState extends State<SignalCard> {
                     widget.signal['direction'],
                     style: TextStyle(
                       color: widget.signal['direction'].toString().toLowerCase() == 'long'
-                          ? Colors.green
-                          : Colors.red,
+                          ? Colors.green.withOpacity(0.8)
+                          : Colors.red.withOpacity(0.8),
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -202,8 +202,8 @@ class _SignalCardState extends State<SignalCard> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: isDark 
-                ? Theme.of(context).colorScheme.surface
-                : Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                ? Theme.of(context).colorScheme.surface.withOpacity(0.5)
+                : Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: Theme.of(context).dividerTheme.color ?? Colors.transparent,
@@ -229,7 +229,9 @@ class _SignalCardState extends State<SignalCard> {
                 ],
               ),
               const SizedBox(height: 16),
-              const Divider(),
+              Divider(
+                color: Theme.of(context).dividerTheme.color?.withOpacity(0.5),
+              ),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -264,6 +266,9 @@ class _SignalCardState extends State<SignalCard> {
       child: Card(
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         elevation: 0,
+        color: isDark 
+            ? Theme.of(context).colorScheme.surface
+            : Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
           side: BorderSide(
@@ -365,92 +370,93 @@ class _SignalCardState extends State<SignalCard> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Container(
-      padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
         color: isDark 
-            ? Theme.of(context).colorScheme.surface
-            : Theme.of(context).colorScheme.primary.withOpacity(0.05),
+            ? Theme.of(context).colorScheme.surface.withOpacity(0.5)
+            : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
+        border: Border.all(
           color: Theme.of(context).dividerTheme.color ?? Colors.transparent,
-                    width: 1,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Icon(
-                            Icons.analytics_outlined,
-                  color: Theme.of(context).colorScheme.primary,
-                            size: 16,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Analysis',
-                          style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    LayoutBuilder(
-                      builder: (context, constraints) {
+                ),
+                child: Icon(
+                  Icons.analytics_outlined,
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                  size: 16,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Analysis',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          LayoutBuilder(
+            builder: (context, constraints) {
               final text = widget.signal["hasTradingAnalysis"] 
                   ? widget.signal["tradingAnalysis"] 
                   : "No analysis available for this signal.";
-                        
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              text,
+              
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    text,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                height: 1.5,
-                              ),
-                              maxLines: showFullAnalysis ? null : 6,
-                              overflow: TextOverflow.fade,
-                            ),
+                      height: 1.5,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                    ),
+                    maxLines: showFullAnalysis ? null : 6,
+                    overflow: TextOverflow.fade,
+                  ),
                   if (text.length > 300)
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => SignalDetailedPage(signal: widget.signal),
-                                    ),
-                                  );
-                                },
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SignalDetailedPage(signal: widget.signal),
+                          ),
+                        );
+                      },
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
                         minimumSize: const Size(0, 0),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                                child: Text(
+                      child: Text(
                         'Show more...',
-                                  style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                                    fontSize: 12,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                          fontSize: 12,
                           fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        );
-                      },
+                        ),
+                      ),
                     ),
-                  ],
+                ],
+              );
+            },
+          ),
+        ],
       ),
     );
   }
