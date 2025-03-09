@@ -59,7 +59,7 @@ class _SignInState extends State<SignIn> {
             // Email Input
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+      children: [
                 Padding(
                   padding: const EdgeInsets.only(left: 2, bottom: 8),
                   child: Text(
@@ -69,10 +69,10 @@ class _SignInState extends State<SignIn> {
                     ),
                   ),
                 ),
-                TextField(
-                  controller: _emailController,
+        TextField(
+            controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
+            decoration: InputDecoration(
                     hintText: "name@example.com",
                     prefixIcon: Icon(
                       Icons.email_outlined,
@@ -96,10 +96,10 @@ class _SignInState extends State<SignIn> {
                     ),
                   ),
                 ),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: !_showPassword,
-                  decoration: InputDecoration(
+        TextField(
+        controller: _passwordController,
+        obscureText: !_showPassword,
+        decoration: InputDecoration(
                     hintText: "Enter your password",
                     prefixIcon: Icon(
                       Icons.lock_outline,

@@ -14,373 +14,358 @@ class SignalCard extends StatefulWidget {
 }
 
 class _SignalCardState extends State<SignalCard> {
-  bool isFavorite = false; // Local state to track favorite status
+  bool isFavorite = false;
   bool showFullAnalysis = false;
 
   @override
   void initState() {
     super.initState();
-    isFavorite = widget.signal['isFavorite'] ?? false; // Initialize state
+    isFavorite = widget.signal['isFavorite'] ?? false;
   }
 
   Future<void> toggleFavorite() async {
     final apiClient = ApiClient();
     final signalId = widget.signal["_id"];
 
-    final url = "${ApiConstants.baseUrl}signals/favorite/$signalId";
-    debugPrint("🔹 Toggling favorite: $url");
-
     try {
-      final response = await apiClient.post(url, {}); // Send POST request
-      debugPrint("✅ Favorite toggled: $response");
-
-      setState(() {
-        isFavorite = !isFavorite; // Toggle favorite status
-      });
+      await apiClient.post("${ApiConstants.baseUrl}signals/favorite/$signalId", {});
+      setState(() => isFavorite = !isFavorite);
     } catch (e) {
       debugPrint("❌ Error toggling favorite: $e");
     }
   }
 
+  Widget _buildTypeTag(String type) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    LinearGradient getGradient() {
+      switch (type.toLowerCase()) {
+        case 'gold':
+          return LinearGradient(
+            colors: [
+              Colors.yellow.shade700,
+              Colors.amber.shade600,
+              Colors.yellow.shade500,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          );
+        case 'crypto':
+          return LinearGradient(
+            colors: isDark ? [
+              Colors.grey.shade700,
+              Colors.grey.shade600,
+              Colors.grey.shade500,
+            ] : [
+              Colors.grey.shade300,
+              Colors.grey.shade400,
+              Colors.grey.shade500,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          );
+        case 'stocks':
+          return LinearGradient(
+            colors: [
+              Colors.black87,
+              Colors.black54,
+              Colors.black45,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          );
+        default:
+          return LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.primary.withOpacity(0.8),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          );
+      }
+    }
+
+    Color getTextColor() {
+      switch (type.toLowerCase()) {
+        case 'gold':
+          return Colors.black87;
+        case 'crypto':
+          return isDark ? Colors.white : Colors.black87;
+        case 'stocks':
+          return Colors.white;
+        default:
+          return Theme.of(context).colorScheme.onPrimary;
+      }
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+      margin: const EdgeInsets.only(left: 8),
+      decoration: BoxDecoration(
+        gradient: getGradient(),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Text(
+        type.toUpperCase(),
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: getTextColor(),
+          letterSpacing: 0.8,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width ,
-      child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        color: Theme.of(context).cardColor,
-        elevation: 10,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: Theme.of(context).dividerTheme.color ?? Colors.transparent,
+          width: 1,
+        ),
+      ),
         child: Padding(
-          padding: const EdgeInsets.all(15),
+        padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
             Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                Expanded(
+                  child: Row(
                     children: [
-                    if(widget.signal["type"] != "gold")   Text(widget.signal["coin"],
-                          style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold)),
-                      if(widget.signal["type"] == "gold") Container(
-                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-                        margin: const EdgeInsets.only(left: 8),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.yellow.shade700, Colors.yellow.shade100],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
+                      if (widget.signal["type"] != "gold") 
+                        Text(
+                          widget.signal["coin"],
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
                           ),
-                          borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Center(
-                          child: Text(
-                            "GOLD",
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
+                      _buildTypeTag(widget.signal["type"]),
+                    ],
+                  ),
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_outline,
+                        color: isFavorite 
+                            ? Theme.of(context).colorScheme.error
+                            : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                        size: 20,
+                      ),
+                      onPressed: toggleFavorite,
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: widget.signal['direction'].toString().toLowerCase() == 'long'
+                            ? Colors.green.withOpacity(isDark ? 0.2 : 0.1)
+                            : Colors.red.withOpacity(isDark ? 0.2 : 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: widget.signal['direction'].toString().toLowerCase() == 'long'
+                              ? Colors.green.withOpacity(0.5)
+                              : Colors.red.withOpacity(0.5),
+                          width: 1,
                         ),
                       ),
-                      if(widget.signal["type"] == "crypto") Container(
-                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-                        margin: const EdgeInsets.only(left: 8),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.grey.shade700, Colors.grey.shade500],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Center(
                           child: Text(
-                            "CRYPTO",
+                        widget.signal['direction'],
                             style: TextStyle(
+                          color: widget.signal['direction'].toString().toLowerCase() == 'long'
+                              ? Colors.green
+                              : Colors.red,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
                         ),
                       ),
-                      if(widget.signal["type"] == "stocks") Container(
-                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-                        margin: const EdgeInsets.only(left: 8),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.black87, Colors.black12],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),
+                color: isDark 
+                    ? Theme.of(context).colorScheme.surface
+                    : Theme.of(context).colorScheme.primary.withOpacity(0.05),
                           borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "STOCKS", 
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                        ),
+                border: Border.all(
+                  color: Theme.of(context).dividerTheme.color ?? Colors.transparent,
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildInfoColumn(
+                        icon: Icons.access_time,
+                        label: "Date/Time",
+                        value: widget.signal["createdFormatted"],
+                      ),
+                      _buildInfoColumn(
+                        icon: Icons.account_balance_wallet,
+                        label: "Portfolio %",
+                        value: "${widget.signal["portfolioPercentage"]}%",
+                        alignRight: true,
                       ),
                     ],
                   ),
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 16),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      IconButton(
-                        icon: Icon(
-                          isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color: isFavorite ? Colors.red : Colors.grey,
-                        ),
-                        onPressed: toggleFavorite, // Call toggle function
+                      _buildPriceColumn(
+                        icon: Icons.call_made,
+                        label: "Entry Price",
+                        value: "\$${widget.signal["entryPrice"]}",
+                        isEntry: true,
                       ),
-                      TextButton(
-                        onPressed: () {},
-                        style: ButtonStyle(
-                            backgroundColor: WidgetStatePropertyAll(widget
-                                        .signal['direction']
-                                        .toString()
-                                        .toLowerCase() ==
-                                    'long'
-                                ? Colors.green
-                                : Colors.red),
-                            shape: WidgetStatePropertyAll(
-                                RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    side: BorderSide(
-                                        color: widget.signal['direction']
-                                                    .toString()
-                                                    .toLowerCase() ==
-                                                'long'
-                                            ? Colors.green.shade800
-                                            : Colors.red.shade800,
-                                        width: 2)))),
-                        child: Text("${widget.signal['direction']}",
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold)),
+                      _buildPriceColumn(
+                        icon: Icons.call_received,
+                        label: "Exit Price",
+                        value: "\$${widget.signal["exitPrice"]}",
+                        isEntry: false,
+                        alignRight: true,
                       ),
                     ],
                   ),
                 ],
               ),
-              Divider(),
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.grey[900]!,
-                      Colors.grey[850]!,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.grey[800]!,
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.access_time, 
-                                    size: 16,
-                                    color: Colors.grey[400],
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    "Date/Time",
-                                    style: TextStyle(
-                                      color: Colors.grey[400],
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                "${widget.signal["createdFormatted"]}",
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+            ),
+            if (widget.showAnalysis) ...[
+              const SizedBox(height: 16),
+              _buildAnalysisSection(),
+            ],
                             ],
                           ),
                         ),
-                        Container(
-                          height: 40,
-                          width: 1,
-                          color: Colors.grey[700],
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Icon(Icons.account_balance_wallet,
-                                    size: 16,
-                                    color: Colors.grey[400],
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    "Portfolio %",
-                                    style: TextStyle(
-                                      color: Colors.grey[400],
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                "${widget.signal["portfolioPercentage"]}%",
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Container(
-                      height: 1,
-                      color: Colors.grey[700],
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.call_made,
-                                    size: 16,
-                                    color: Colors.green[400],
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    "Entry Price",
-                                    style: TextStyle(
-                                      color: Colors.grey[400],
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                "\$${widget.signal["entryPrice"]}",
-                                style: TextStyle(
-                                  color: Colors.green[400],
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          height: 40,
-                          width: 1,
-                          color: Colors.grey[700],
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Icon(Icons.call_received,
-                                    size: 16,
-                                    color: Colors.red[400],
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    "Exit Price",
-                                    style: TextStyle(
-                                      color: Colors.grey[400],
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                "\$${widget.signal["exitPrice"]}",
-                                style: TextStyle(
-                                  color: Colors.red[400],
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+    );
+  }
 
-              // if (widget.showAnalysis == true) ...[
-              //   const SizedBox(height: 10),
-              //   Text("Analysis: ${'widget.signal["analysis"]'}")
-              // ],
-              if(widget.showAnalysis==true) Container(
-                margin: const EdgeInsets.only(top: 16),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+  Widget _buildInfoColumn({
+    required IconData icon,
+    required String label,
+    required String value,
+    bool alignRight = false,
+  }) {
+    return Expanded(
+                          child: Column(
+        crossAxisAlignment: alignRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                            children: [
+                              Row(
+            mainAxisAlignment: alignRight ? MainAxisAlignment.end : MainAxisAlignment.start,
+                                children: [
+              Icon(
+                icon,
+                                    size: 16,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+            value,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+    );
+  }
+
+  Widget _buildPriceColumn({
+    required IconData icon,
+    required String label,
+    required String value,
+    required bool isEntry,
+    bool alignRight = false,
+  }) {
+    final color = isEntry ? Colors.green : Colors.red;
+    
+    return Expanded(
+                          child: Column(
+        crossAxisAlignment: alignRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                            children: [
+                              Row(
+            mainAxisAlignment: alignRight ? MainAxisAlignment.end : MainAxisAlignment.start,
+                                children: [
+              Icon(
+                icon,
+                                    size: 16,
+                color: color.withOpacity(0.8),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+            value,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: color,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+    );
+  }
+
+  Widget _buildAnalysisSection() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.grey[900]!,
-                      Colors.grey[850]!,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
+        color: isDark 
+            ? Theme.of(context).colorScheme.surface
+            : Theme.of(context).colorScheme.primary.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Colors.grey[800]!,
+          color: Theme.of(context).dividerTheme.color ?? Colors.transparent,
                     width: 1,
                   ),
                 ),
@@ -392,12 +377,12 @@ class _SignalCardState extends State<SignalCard> {
                         Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: Colors.amber[400]!.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4),
                           ),
                           child: Icon(
                             Icons.analytics_outlined,
-                            color: Colors.amber[400],
+                  color: Theme.of(context).colorScheme.primary,
                             size: 16,
                           ),
                         ),
@@ -405,10 +390,9 @@ class _SignalCardState extends State<SignalCard> {
                         Text(
                           'Analysis',
                           style: TextStyle(
-                            color: Colors.amber[400],
+                  color: Theme.of(context).colorScheme.primary,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            letterSpacing: 0.5,
                           ),
                         ),
                       ],
@@ -416,38 +400,22 @@ class _SignalCardState extends State<SignalCard> {
                     const SizedBox(height: 12),
                     LayoutBuilder(
                       builder: (context, constraints) {
-                        final text = widget.signal["hasTradingAnalysis"] ? widget.signal["tradingAnalysis"] : "No analysis available for this signal.";
-                        final textSpan = TextSpan(
-                          text: text,
-                          style: TextStyle(
-                            color: Colors.grey[300],
-                            fontSize: 13,
-                            height: 1.5,
-                          ),
-                        );
-                        final textPainter = TextPainter(
-                          text: textSpan,
-                          textDirection: TextDirection.ltr,
-                          maxLines: showFullAnalysis ? null : 6,
-                        );
-                        textPainter.layout(maxWidth: constraints.maxWidth);
-                        
-                        final exceededMaxLines = textPainter.didExceedMaxLines;
+              final text = widget.signal["hasTradingAnalysis"] 
+                  ? widget.signal["tradingAnalysis"] 
+                  : "No analysis available for this signal.";
                         
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               text,
-                              style: TextStyle(
-                                color: Colors.grey[300],
-                                fontSize: 13,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 height: 1.5,
                               ),
                               maxLines: showFullAnalysis ? null : 6,
                               overflow: TextOverflow.fade,
                             ),
-                            if (exceededMaxLines)
+                  if (text.length > 300)
                               TextButton(
                                 onPressed: () {
                                   Navigator.push(
@@ -457,11 +425,17 @@ class _SignalCardState extends State<SignalCard> {
                                     ),
                                   );
                                 },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(0, 0),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
                                 child: Text(
-                                  showFullAnalysis ? 'Show less' : 'Show more...',
+                        'Show more...',
                                   style: TextStyle(
-                                    color: Colors.amber[400],
+                          color: Theme.of(context).colorScheme.primary,
                                     fontSize: 12,
+                          fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ),
@@ -470,11 +444,6 @@ class _SignalCardState extends State<SignalCard> {
                       },
                     ),
                   ],
-                ),
-              )
-            ],
-          ),
-        ),
       ),
     );
   }

@@ -17,20 +17,44 @@ class _SignalsPageState extends State<SignalsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text("Trading Signals"),
+        title: Text(
+          "Trading Signals",
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        elevation: 0,
       ),
       body: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildTabButton("Current", 0),
-              _buildTabButton("History", 1),
-              _buildTabButton("Favourites", 2),
-            ],
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              border: Border(
+                bottom: BorderSide(
+                  color: Theme.of(context).dividerTheme.color ?? Colors.transparent,
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildTabButton("Current", 0),
+                const SizedBox(width: 12),
+                _buildTabButton("History", 1),
+                const SizedBox(width: 12),
+                _buildTabButton("Favourites", 2),
+              ],
+            ),
           ),
           Expanded(
             child: _selectedTab == 0
@@ -45,28 +69,42 @@ class _SignalsPageState extends State<SignalsPage> {
   }
 
   Widget _buildTabButton(String title, int index) {
-    return ElevatedButton(
-      onPressed: () => setState(() => _selectedTab = index),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: _selectedTab == index
-            ? Theme.of(context).colorScheme.primary
-            : Theme.of(context).colorScheme.surface,
-        foregroundColor: _selectedTab == index
-            ? Theme.of(context).colorScheme.onPrimary
-            : Theme.of(context).colorScheme.onSurface,
-        elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
-          side: BorderSide(
-            color: _selectedTab == index
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).dividerTheme.color ?? Colors.transparent,
-            width: 1,
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isSelected = _selectedTab == index;
+    
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => setState(() => _selectedTab = index),
+        borderRadius: BorderRadius.circular(6),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary.withOpacity(isDarkMode ? 1 : 0.1)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).dividerTheme.color ?? Colors.transparent,
+              width: 1,
+            ),
+          ),
+          child: Text(
+            title,
+            style: TextStyle(
+              color: isSelected
+                  ? isDarkMode
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              fontSize: 14,
+            ),
           ),
         ),
       ),
-      child: Text(title),
     );
   }
 }

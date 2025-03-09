@@ -152,9 +152,9 @@ class MyTheme {
       shape: WidgetStateProperty.all(
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
-        ),
       ),
-    );
+    ),
+  );
   }
 
   static ThemeData _buildTheme({required bool isDark}) {
@@ -205,8 +205,8 @@ class MyTheme {
           fontSize: 14,
           height: 1.5,
         ),
-      ),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: isDark ? card : cardLight,
         selectedItemColor: isDark ?  primaryLight :primary,
         unselectedItemColor: isDark ? mutedForeground : mutedForegroundLight,
