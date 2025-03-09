@@ -133,142 +133,149 @@ class _SignalCardState extends State<SignalCard> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(
-          color: Theme.of(context).dividerTheme.color ?? Colors.transparent,
-          width: 1,
-        ),
-      ),
-        child: Padding(
-        padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-            Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    Widget cardContent = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Row(
                 children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      if (widget.signal["type"] != "gold") 
-                        Text(
-                          widget.signal["coin"],
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      _buildTypeTag(widget.signal["type"]),
-                    ],
-                  ),
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_outline,
-                        color: isFavorite 
-                            ? Theme.of(context).colorScheme.error
-                            : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-                        size: 20,
-                      ),
-                      onPressed: toggleFavorite,
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: widget.signal['direction'].toString().toLowerCase() == 'long'
-                            ? Colors.green.withOpacity(isDark ? 0.2 : 0.1)
-                            : Colors.red.withOpacity(isDark ? 0.2 : 0.1),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: widget.signal['direction'].toString().toLowerCase() == 'long'
-                              ? Colors.green.withOpacity(0.5)
-                              : Colors.red.withOpacity(0.5),
-                          width: 1,
-                        ),
-                      ),
-                          child: Text(
-                        widget.signal['direction'],
-                            style: TextStyle(
-                          color: widget.signal['direction'].toString().toLowerCase() == 'long'
-                              ? Colors.green
-                              : Colors.red,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                        ),
+                  if (widget.signal["type"] != "gold") 
+                    Text(
+                      widget.signal["coin"],
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                color: isDark 
-                    ? Theme.of(context).colorScheme.surface
-                    : Theme.of(context).colorScheme.primary.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).dividerTheme.color ?? Colors.transparent,
-                  width: 1,
-                ),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildInfoColumn(
-                        icon: Icons.access_time,
-                        label: "Date/Time",
-                        value: widget.signal["createdFormatted"],
-                      ),
-                      _buildInfoColumn(
-                        icon: Icons.account_balance_wallet,
-                        label: "Portfolio %",
-                        value: "${widget.signal["portfolioPercentage"]}%",
-                        alignRight: true,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Divider(),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildPriceColumn(
-                        icon: Icons.call_made,
-                        label: "Entry Price",
-                        value: "\$${widget.signal["entryPrice"]}",
-                        isEntry: true,
-                      ),
-                      _buildPriceColumn(
-                        icon: Icons.call_received,
-                        label: "Exit Price",
-                        value: "\$${widget.signal["exitPrice"]}",
-                        isEntry: false,
-                        alignRight: true,
-                      ),
-                    ],
-                  ),
+                  _buildTypeTag(widget.signal["type"]),
                 ],
               ),
             ),
-            if (widget.showAnalysis) ...[
+            Row(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    isFavorite ? Icons.favorite : Icons.favorite_outline,
+                    color: isFavorite 
+                        ? Theme.of(context).colorScheme.error
+                        : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                    size: 20,
+                  ),
+                  onPressed: toggleFavorite,
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: widget.signal['direction'].toString().toLowerCase() == 'long'
+                        ? Colors.green.withOpacity(isDark ? 0.2 : 0.1)
+                        : Colors.red.withOpacity(isDark ? 0.2 : 0.1),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: widget.signal['direction'].toString().toLowerCase() == 'long'
+                          ? Colors.green.withOpacity(0.5)
+                          : Colors.red.withOpacity(0.5),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    widget.signal['direction'],
+                    style: TextStyle(
+                      color: widget.signal['direction'].toString().toLowerCase() == 'long'
+                          ? Colors.green
+                          : Colors.red,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDark 
+                ? Theme.of(context).colorScheme.surface
+                : Theme.of(context).colorScheme.primary.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: Theme.of(context).dividerTheme.color ?? Colors.transparent,
+              width: 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildInfoColumn(
+                    icon: Icons.access_time,
+                    label: "Date/Time",
+                    value: widget.signal["createdFormatted"],
+                  ),
+                  _buildInfoColumn(
+                    icon: Icons.account_balance_wallet,
+                    label: "Portfolio %",
+                    value: "${widget.signal["portfolioPercentage"]}%",
+                    alignRight: true,
+                  ),
+                ],
+              ),
               const SizedBox(height: 16),
-              _buildAnalysisSection(),
+              const Divider(),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildPriceColumn(
+                    icon: Icons.call_made,
+                    label: "Entry Price",
+                    value: "\$${widget.signal["entryPrice"]}",
+                    isEntry: true,
+                  ),
+                  _buildPriceColumn(
+                    icon: Icons.call_received,
+                    label: "Exit Price",
+                    value: "\$${widget.signal["exitPrice"]}",
+                    isEntry: false,
+                    alignRight: true,
+                  ),
+                ],
+              ),
             ],
-                            ],
-                          ),
-                        ),
+          ),
+        ),
+        if (widget.showAnalysis) ...[
+          const SizedBox(height: 16),
+          _buildAnalysisSection(),
+        ],
+      ],
+    );
+
+    return SizedBox(
+      width: widget.showAnalysis ? MediaQuery.of(context).size.width : null,
+      child: Card(
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(
+            color: Theme.of(context).dividerTheme.color ?? Colors.transparent,
+            width: 1,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: cardContent,
+        ),
+      ),
     );
   }
 
@@ -358,7 +365,7 @@ class _SignalCardState extends State<SignalCard> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
         color: isDark 
             ? Theme.of(context).colorScheme.surface
