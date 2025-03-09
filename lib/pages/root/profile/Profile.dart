@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tradingapp/pages/services/UserService.dart';
 import 'package:tradingapp/pages/services/constants/constants.dart';
-
+import 'package:tradingapp/pages/root/profile/providers/profile_provider.dart';
 import '../../services/AuthService.dart';
 
 class Profile extends StatefulWidget {
@@ -13,6 +13,17 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  @override
+  void initState() {
+    super.initState();
+    _initializeProfile();
+  }
+
+  Future<void> _initializeProfile() async {
+    final provider = Provider.of<ProfileProvider>(context, listen: false);
+    await provider.initializeProfile();
+  }
+
   _signOut() {
     Provider.of<AuthService>(context, listen: false).signOut();
     Provider.of<UserService>(context, listen: false).clearUser();
@@ -22,41 +33,48 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-    final userService = Provider.of<UserService>(context);
-    final email = userService.user?.email ?? '';
-    final phone = userService.user?.phoneNumber?? '';
-    final fingerprint = userService.user?.uid ?? '';
+    return Consumer2<UserService, ProfileProvider>(
+      builder: (context, userService, profileProvider, child) {
+        final email = userService.user?.email ?? '';
+        final phone = userService.user?.phoneNumber ?? '';
+        final fingerprint = userService.user?.uid ?? '';
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: ListView(
-        
-        children: [
-          ProfileListTile(
-            title: 'Phone Number',
-            icon: Icons.phone,
-            subtitleIcon: Icons.local_phone,
-            value: phone,
+        return RefreshIndicator(
+          onRefresh: () => profileProvider.fetchProfileData(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: ListView(
+              children: [
+                if (profileProvider.isLoading)
+                  const LinearProgressIndicator(),
+                ProfileListTile(
+                  title: 'Phone Number',
+                  icon: Icons.phone,
+                  subtitleIcon: Icons.local_phone,
+                  value: phone,
+                ),
+                ProfileListTile(
+                  title: 'Email Address',
+                  icon: Icons.email,
+                  subtitleIcon: Icons.alternate_email,
+                  value: email,
+                ),
+                ProfileListTile(
+                  title: 'Key Fingerprint',
+                  icon: Icons.fingerprint,
+                  subtitleIcon: Icons.verified,
+                  value: fingerprint,
+                ),
+                ListTile(
+                  onTap: () => _signOut(),
+                  leading: Icon(Icons.logout_outlined),
+                  title: Text("Sign out"),
+                ),
+              ],
+            ),
           ),
-          ProfileListTile(
-            title: 'Email Address',
-            icon: Icons.email,
-            subtitleIcon: Icons.alternate_email,
-            value: email,
-          ),
-          ProfileListTile(
-            title: 'Key Fingerprint',
-            icon: Icons.fingerprint,
-            subtitleIcon: Icons.verified,
-            value: fingerprint,
-          ),
-          ListTile(
-            onTap: () => _signOut(),
-            leading: Icon(Icons.logout_outlined),
-            title: Text("Sign out"),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

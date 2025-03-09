@@ -10,6 +10,9 @@ import 'package:tradingapp/pages/services/ThemeService.dart';
 import 'package:tradingapp/pages/services/UserService.dart';
 import 'package:tradingapp/pages/services/constants/constants.dart';
 import 'package:tradingapp/theme/theme.dart';
+import 'package:tradingapp/pages/newsAlerts/providers/news_alerts_provider.dart';
+import 'package:tradingapp/pages/signals/providers/signals_provider.dart';
+import 'package:tradingapp/pages/root/profile/providers/profile_provider.dart';
 // import 'package:tradingapp/pages/services/firebase_options.dart';
 
 void main() async{
@@ -22,7 +25,10 @@ void main() async{
       MultiProvider(providers: [
         ChangeNotifierProvider(create: (create)=>UserService()),
         ChangeNotifierProvider(create: (create)=>AuthService()),
-        ChangeNotifierProvider(create: (create)=>ThemeService(ThemeMode.light))
+        ChangeNotifierProvider(create: (create)=>ThemeService(ThemeMode.light)),
+        ChangeNotifierProvider(create: (_) => NewsAlertsProvider()),
+        ChangeNotifierProvider(create: (_) => SignalsProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
       ]
       ,
       child:const MyApp()));

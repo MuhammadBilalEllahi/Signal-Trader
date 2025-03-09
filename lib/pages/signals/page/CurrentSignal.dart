@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:tradingapp/pages/signals/components/ShimmerSignalCard.dart';
 import 'package:tradingapp/pages/signals/components/SignalCard.dart';
+import 'package:tradingapp/pages/signals/providers/signals_provider.dart';
 import 'package:tradingapp/shared/client/ApiClient.dart';
 import 'package:tradingapp/shared/constants/Constants.dart';
 
@@ -19,12 +21,7 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
   bool isVertical = false;
   int currentIndex = 0;
   final ScrollController _scrollController = ScrollController();
-  List<Map<String, dynamic>> signals = [];
   late IO.Socket socket;
-
-  int currentPage = 1;
-  bool isLoading = false;
-  bool hasMore = true;
 
   // Filter state variables
   String selectedType = 'all';
@@ -45,9 +42,14 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
   void initState() {
     super.initState();
     _loadViewPreference();
-    _fetchPaginatedSignals();
+    _initializeData();
     _connectSocket();
     _scrollController.addListener(_onScroll);
+  }
+
+  Future<void> _initializeData() async {
+    final provider = Provider.of<SignalsProvider>(context, listen: false);
+    await provider.initializeSignals();
   }
 
   @override
@@ -97,7 +99,7 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
     });
   }
 
-  List<Map<String, dynamic>> getFilteredSignals() {
+  List<Map<String, dynamic>> getFilteredSignals(List<Map<String, dynamic>> signals) {
     return signals.where((signal) {
       bool typeMatch = appliedType == 'all' || signal['type'] == appliedType;
       bool coinMatch = appliedCoin.isEmpty || signal['coin'].toString().toLowerCase().contains(appliedCoin.toLowerCase());
@@ -107,39 +109,6 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
       
       return typeMatch && coinMatch && directionMatch && entryPriceMatch && exitPriceMatch;
     }).toList();
-  }
-
-  Future<void> _fetchPaginatedSignals({bool isLoadMore = false}) async {
-    if (isLoading || !hasMore) return;
-
-    final apiClient = ApiClient();
-    setState(() => isLoading = true);
-
-    try {
-      final response = await apiClient.get("signals/paginated?pageId=$currentPage&pageSize=5");
-      print("response $response");
-
-      if (response != null && response.containsKey("signals")) {
-        List<Map<String, dynamic>> newSignals = List<Map<String, dynamic>>.from(response["signals"]);
-
-        setState(() {
-          if (isLoadMore) {
-            signals.addAll(newSignals);
-          } else {
-            signals = newSignals;
-          }
-
-          hasMore = newSignals.length == 5;
-          if (hasMore) currentPage++;
-        });
-      } else {
-        debugPrint("Error fetching signals: ${response.body}");
-      }
-    } catch (e) {
-      debugPrint("Exception fetching signals: $e");
-    } finally {
-      setState(() => isLoading = false);
-    }
   }
 
   void _connectSocket() async {
@@ -160,9 +129,7 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
     socket.on('new-signal', (data) {
       debugPrint("SIGNAL DATA $data");
       if (data != null && data is Map<String, dynamic>) {
-        setState(() {
-          signals.insert(0, data);
-        });
+        Provider.of<SignalsProvider>(context, listen: false).addNewSignal(data);
       } else {
         debugPrint("Invalid signal data received: $data");
       }
@@ -171,47 +138,12 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
     socket.onDisconnect((_) => debugPrint('Disconnected from WebSocket'));
   }
 
-  void _scrollToIndex(int index) {
-    double offset = index * MediaQuery.of(context).size.width ;
-    _scrollController.animateTo(
-      offset,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-  }
-
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 50 &&
-        hasMore &&
-        !isLoading) {
-      _fetchPaginatedSignals(isLoadMore: true);
-    }
-    
-    // Update current index based on scroll position
-    setState(() {
-      currentIndex = (_scrollController.position.pixels / MediaQuery.of(context).size.width).round();
-    });
-  }
-
-  void _handleNext() {
-    if (currentIndex < signals.length - 1) {
-      setState(() {
-        currentIndex++;
-        _scrollToIndex(currentIndex);
-      });
-    }
-
-    if (currentIndex == signals.length - 1 && hasMore && !isLoading) {
-      _fetchPaginatedSignals(isLoadMore: true);
-    }
-  }
-
-  void _handlePrev() {
-    if (currentIndex > 0) {
-      setState(() {
-        currentIndex--;
-        _scrollToIndex(currentIndex);
-      });
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 50) {
+      final provider = Provider.of<SignalsProvider>(context, listen: false);
+      if (!provider.isLoading && provider.hasMore) {
+        provider.fetchSignals();
+      }
     }
   }
 
@@ -405,116 +337,135 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredSignals = getFilteredSignals();
-    
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 7),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+    return Consumer<SignalsProvider>(
+      builder: (context, signalsProvider, child) {
+        final filteredSignals = getFilteredSignals(signalsProvider.signals);
+        
+        return RefreshIndicator(
+          onRefresh: () => signalsProvider.fetchSignals(refresh: true),
+          child: Column(
             children: [
-              IconButton(
-                icon: const Icon(Icons.filter_list),
-                onPressed: _showFilterDialog,
-              ),
-              IconButton(
-                icon: Icon(isVertical ? Icons.view_array : Icons.calendar_view_day_rounded),
-                onPressed: () {
-                  setState(() {
-                    isVertical = !isVertical;
-                    _saveViewPreference(isVertical);
-                  });
-                },
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: isVertical
-              ? NotificationListener<ScrollNotification>(
-                  onNotification: (scrollNotification) {
-                    if (scrollNotification.metrics.pixels == scrollNotification.metrics.maxScrollExtent &&
-                        !isLoading) {
-                      _fetchPaginatedSignals(isLoadMore: true);
-                    }
-                    return false;
-                  },
-                  child: ListView.builder(
-                    itemCount: filteredSignals.length + (hasMore ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index == filteredSignals.length) {
-                        return Column(
-                          children: [ShimmerSignalCard(100), ShimmerSignalCard(100), ShimmerSignalCard(100)],
-                        );
-                      }
-                      return SignalCard(filteredSignals[index]);
-                    },
-                  ),
-                )
-              : NotificationListener<ScrollNotification>(
-                  onNotification: (scrollNotification) {
-                    if (scrollNotification.metrics.pixels >= scrollNotification.metrics.maxScrollExtent - 50 &&
-                        hasMore &&
-                        !isLoading) {
-                      _fetchPaginatedSignals(isLoadMore: true);
-                    }
-                    return false;
-                  },
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    controller: _scrollController,
-                    child: Row(
-                      children: [
-                        ...filteredSignals.map((signal) => SignalCard(signal, showAnalysis: true)),
-                        if (isLoading) ...[
-                          ShimmerSignalCard(600),
-                          ShimmerSignalCard(600),
-                          ShimmerSignalCard(600),
-                        ],
-                      ],
+              Padding(
+                padding: const EdgeInsets.only(right: 7),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.filter_list),
+                      onPressed: _showFilterDialog,
                     ),
-                  ),
+                    IconButton(
+                      icon: Icon(isVertical ? Icons.view_array : Icons.calendar_view_day_rounded),
+                      onPressed: () {
+                        setState(() {
+                          isVertical = !isVertical;
+                          _saveViewPreference(isVertical);
+                        });
+                      },
+                    ),
+                  ],
                 ),
-        ),
-        if (!isVertical) ...[
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextButton(
-                onPressed: _handlePrev,
-                child: const Text("Prev"),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: _getVisibleIndices(currentIndex, filteredSignals.length)
-                    .map((index) =>  TextButton(
-                            onPressed: () => _scrollToIndex(index),
-                            style: TextButton.styleFrom(
-                              backgroundColor: currentIndex == index ? Colors.yellow : Colors.transparent,
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              minimumSize: const Size(0, 0),
-                            ),
-                            child: Text(
-                              '${index + 1}',
-                              style: TextStyle(
-                                color: currentIndex == index ?   Colors.black: Colors.white,
-                              ),
-                            ),
-                        
-                        ))
-                    .toList(),
+              Expanded(
+                child: isVertical
+                    ? NotificationListener<ScrollNotification>(
+                        onNotification: (scrollNotification) {
+                          if (scrollNotification.metrics.pixels == scrollNotification.metrics.maxScrollExtent &&
+                              !signalsProvider.isLoading && signalsProvider.hasMore) {
+                            signalsProvider.fetchSignals();
+                          }
+                          return false;
+                        },
+                        child: ListView.builder(
+                          itemCount: filteredSignals.length + (signalsProvider.hasMore ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            if (index == filteredSignals.length) {
+                              return Column(
+                                children: [ShimmerSignalCard(100), ShimmerSignalCard(100), ShimmerSignalCard(100)],
+                              );
+                            }
+                            return SignalCard(filteredSignals[index]);
+                          },
+                        ),
+                      )
+                    : NotificationListener<ScrollNotification>(
+                        onNotification: (scrollNotification) {
+                          if (scrollNotification.metrics.pixels >= scrollNotification.metrics.maxScrollExtent - 50 &&
+                              signalsProvider.hasMore && !signalsProvider.isLoading) {
+                            signalsProvider.fetchSignals();
+                          }
+                          return false;
+                        },
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          controller: _scrollController,
+                          child: Row(
+                            children: [
+                              ...filteredSignals.map((signal) => SignalCard(signal, showAnalysis: true)),
+                              if (signalsProvider.isLoading) ...[
+                                ShimmerSignalCard(600),
+                                ShimmerSignalCard(600),
+                                ShimmerSignalCard(600),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
               ),
-              TextButton(
-                onPressed: _handleNext,
-                child: const Text("Next"),
-              ),
+              if (!isVertical) ...[
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        final provider = Provider.of<SignalsProvider>(context, listen: false);
+                        if (currentIndex > 0) {
+                          provider.fetchSignals(refresh: true);
+                        }
+                      },
+                      child: const Text("Prev"),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: _getVisibleIndices(currentIndex, filteredSignals.length)
+                          .map((index) =>  TextButton(
+                                  onPressed: () {
+                                    final provider = Provider.of<SignalsProvider>(context, listen: false);
+                                    provider.fetchSignals(refresh: true, index: index);
+                                  },
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: currentIndex == index ? Colors.yellow : Colors.transparent,
+                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    minimumSize: const Size(0, 0),
+                                  ),
+                                  child: Text(
+                                    '${index + 1}',
+                                    style: TextStyle(
+                                      color: currentIndex == index ?   Colors.black: Colors.white,
+                                    ),
+                                  ),
+                              
+                              ))
+                          .toList(),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        final provider = Provider.of<SignalsProvider>(context, listen: false);
+                        if (currentIndex < filteredSignals.length - 1) {
+                          provider.fetchSignals(refresh: true, index: currentIndex + 1);
+                        }
+                      },
+                      child: const Text("Next"),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+              ],
             ],
           ),
-          const SizedBox(height: 20),
-        ],
-      ],
+        );
+      },
     );
   }
 }

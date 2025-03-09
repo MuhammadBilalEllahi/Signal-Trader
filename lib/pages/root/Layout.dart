@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tradingapp/admin/pages/AdminDashboard.dart';
 import 'package:tradingapp/pages/messages/ChatListScreen.dart';
+import 'package:tradingapp/pages/newsAlerts/NewsAlerts.dart';
 import 'package:tradingapp/pages/root/profile/Profile.dart';
 import 'package:tradingapp/pages/root/profile/components/ProfileImage.dart';
 import 'package:tradingapp/pages/signals/SignalsPage.dart';
@@ -51,14 +52,14 @@ class _LayoutState extends State<Layout> {
           PageView(
             controller: _pageController,
             onPageChanged: _onPageChanged,
+            physics: selectedPage == 1 ? const NeverScrollableScrollPhysics() : const PageScrollPhysics(),
             children: const [
               SignalsPage(),
+              NewsAlerts(),
               // AdminDashboard(),
-              SizedBox(),
               Home(),
               ChatListScreen(),
               ProfileImage(),
-              
             ],
           ),
           AnimatedPositioned(
@@ -85,9 +86,9 @@ class _LayoutState extends State<Layout> {
         items: const [
           BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.chart_bar_alt_fill),
-              label: "Signals",
+              label: "Signals", 
               activeIcon: Icon(CupertinoIcons.chart_bar_alt_fill)),
-              BottomNavigationBarItem(
+          BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.news),
               label: "News/Updates",
               activeIcon: Icon(CupertinoIcons.news_solid)),
@@ -99,7 +100,6 @@ class _LayoutState extends State<Layout> {
               icon: Icon(CupertinoIcons.chat_bubble_text),
               label: "Chat",
               activeIcon: Icon(CupertinoIcons.chat_bubble_text_fill)),
-          
           BottomNavigationBarItem(
               icon: Icon(Icons.person_outline_sharp),
               label: "Profile",
