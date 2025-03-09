@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tradingapp/pages/services/UserService.dart';
 import 'package:tradingapp/pages/services/constants/constants.dart';
 import 'package:tradingapp/pages/root/profile/providers/profile_provider.dart';
+import 'package:tradingapp/pages/signals/subscription/SubscriptionPlans.dart';
 import '../../services/AuthService.dart';
 
 class Profile extends StatefulWidget {
@@ -66,9 +67,55 @@ class _ProfileState extends State<Profile> {
                   value: fingerprint,
                 ),
                 ListTile(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SubscriptionPlans(),
+                      ),
+                    );
+                  },
+                  leading: Icon(
+                    Icons.workspace_premium,
+                    size: 36,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: Text(
+                    "Subscription Plans",
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  subtitle: Text(
+                    "Upgrade your trading experience",
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                ),
+                const Divider(),
+                ListTile(
                   onTap: () => _signOut(),
-                  leading: Icon(Icons.logout_outlined),
-                  title: Text("Sign out"),
+                  leading: Icon(
+                    Icons.logout_outlined,
+                    size: 36,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  title: Text(
+                    "Sign out",
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Theme.of(context).colorScheme.error,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -96,20 +143,34 @@ class ProfileListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon, size: 36, color: Colors.grey),
+      leading: Icon(
+        icon,
+        size: 36,
+        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+      ),
       title: Text(
         title,
-        style: const TextStyle(fontSize: 15, color: Colors.grey),
+        style: TextStyle(
+          fontSize: 15,
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+        ),
       ),
       subtitle: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(subtitleIcon, size: 18, color: Colors.grey),
+          Icon(
+            subtitleIcon,
+            size: 18,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+          ),
           Padding(
             padding: const EdgeInsets.only(left: 5),
             child: Text(
               value,
-              style: const TextStyle(fontSize: 13, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),
             ),
           ),
         ],
