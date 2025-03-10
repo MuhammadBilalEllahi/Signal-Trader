@@ -45,12 +45,16 @@ class TradingTypeSwitch extends StatelessWidget {
             isSelected: !isSpotSelected,
             onTap: () {
               if (!hasFuturesAccess) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const FuturesSubscriptionPage(),
-                  ),
+                showDialog(
+                  context: context,
+                  builder: (context) => const FuturesSubscriptionPage(),
                 );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) => const FuturesSubscriptionPage(),
+                //   ),
+                // );
                 return;
               }
               onSpotSelected(false);

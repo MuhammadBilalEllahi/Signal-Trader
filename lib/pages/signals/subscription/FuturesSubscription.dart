@@ -9,7 +9,7 @@ class FuturesSubscriptionPage extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Dialog(
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color.fromARGB(243, 0, 0, 0),
       child: Container(
         width: double.infinity,
         constraints: BoxConstraints(

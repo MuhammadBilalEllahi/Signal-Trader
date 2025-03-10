@@ -8,13 +8,15 @@ class HLSVideoPlayer extends StatefulWidget {
   final bool autoPlay;
   final bool looping;
   final String videoId;
+  // final bool isInReel;
 
-  const HLSVideoPlayer({
+   const HLSVideoPlayer({
     super.key,
     required this.videoUrl,
     required this.videoId,
     this.autoPlay = true,
     this.looping = true,
+    // this.isInReel = false,
   });
 
   @override
@@ -277,6 +279,14 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
     }
   }
 
+// GestureDetector(
+//             onTapDown: _handleTap,
+//             child: AspectRatio(
+//               aspectRatio: _controller!.value.aspectRatio,
+//               child: ,
+//             ),
+//           )
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -284,22 +294,16 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
       children: [
         // Base video player
         if (_isInitialized && _controller != null)
-          GestureDetector(
-            onTapDown: _handleTap,
-            child: AspectRatio(
-              aspectRatio: _controller!.value.aspectRatio,
-              child: VideoPlayer(_controller!),
-            ),
-          )
+        VideoPlayer(_controller!)
+          
         else
           const Center(child: CircularProgressIndicator()),
 
         // Video Progress Bar (moved up in the stack)
         if (_isInitialized && _controller != null)
           Positioned(
-            left: 0,
-            right: 0,
-            bottom: 120, // Positioned under description, above bottom nav
+            width: MediaQuery.of(context).size.width *1.12,
+            bottom: -10, // Positioned under description, above bottom nav
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Column(
@@ -339,25 +343,26 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
                     ),
                   ),
                   // Time indicators
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        _formatDuration(_position),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
-                      ),
-                      Text(
-                        _formatDuration(_duration),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //   children: [
+                  //     Text(
+                  //       _formatDuration(_position),
+                  //       style: const TextStyle(
+                  //         color: Colors.white,
+                  //         fontSize: 12,
+                  //       ),
+                  //     ),
+                  //     Text(
+                  //       _formatDuration(_duration),
+                  //       style: const TextStyle(
+                  //         color: Colors.white,
+                  //         fontSize: 12,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
+               
                 ],
               ),
             ),

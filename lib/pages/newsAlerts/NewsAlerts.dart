@@ -106,7 +106,7 @@ class ReelItem extends StatefulWidget {
 
 class _ReelItemState extends State<ReelItem> {
   VideoPlayerController? _videoController;
-  bool _isPlaying = true;
+  final bool _isPlaying = true;
   final bool _showFullDescription = false;
   int _currentImageIndex = 0;
   late PageController _imagePageController;
@@ -238,7 +238,7 @@ class _ReelItemState extends State<ReelItem> {
 
   Widget _buildVideoPlayer() {
     return Stack(
-      alignment: Alignment.center,
+      // alignment: Alignment.center,
       children: [
         // Video player
         SizedBox(
@@ -249,136 +249,136 @@ class _ReelItemState extends State<ReelItem> {
               : const Center(child: CircularProgressIndicator()),
         ),
         // Buffering indicator
-        if (_isBuffering)
-          Container(
-            color: Colors.black26,
-            child: const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            ),
-          ),
-        // Play/Pause overlay
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              _isPlaying = !_isPlaying;
-              _isPlaying ? _videoController?.play() : _videoController?.pause();
-            });
-          },
-          child: Container(
-            width: double.infinity,
-            height: double.infinity,
-            color: Colors.transparent,
-            child: Center(
-              child: AnimatedOpacity(
-                opacity: _isPlaying ? 0.0 : 1.0,
-                duration: const Duration(milliseconds: 200),
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    _isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: Colors.white,
-                    size: 50,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        // Quality selector
-        Positioned(
-          top: 40,
-          right: 16,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.6),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: PopupMenuButton<String>(
-              onSelected: (String quality) async {
-                String videoUrl = widget.reel['videoUrl'];
-                if (quality != 'auto') {
-                  final Uri uri = Uri.parse(videoUrl);
-                  final String baseUrl = uri.toString().replaceAll('video_h1.m3u8', '');
-                  videoUrl = '${baseUrl}audio-video/$quality/stream.m3u8';
-                }
+        // if (_isBuffering)
+        //   Container(
+        //     color: Colors.black26,
+        //     child: const Center(
+        //       child: CircularProgressIndicator(
+        //         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        //       ),
+        //     ),
+        //   ),
+        // // Play/Pause overlay
+        // GestureDetector(
+        //   onTap: () {
+        //     setState(() {
+        //       _isPlaying = !_isPlaying;
+        //       _isPlaying ? _videoController?.play() : _videoController?.pause();
+        //     });
+        //   },
+        //   child: Container(
+        //     width: double.infinity,
+        //     height: double.infinity,
+        //     color: Colors.transparent,
+        //     child: Center(
+        //       child: AnimatedOpacity(
+        //         opacity: _isPlaying ? 0.0 : 1.0,
+        //         duration: const Duration(milliseconds: 200),
+        //         child: Container(
+        //           padding: const EdgeInsets.all(20),
+        //           decoration: BoxDecoration(
+        //             color: Colors.black.withOpacity(0.5),
+        //             shape: BoxShape.circle,
+        //           ),
+        //           child: Icon(
+        //             _isPlaying ? Icons.pause : Icons.play_arrow,
+        //             color: Colors.white,
+        //             size: 50,
+        //           ),
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ),
+        // // Quality selector
+        // Positioned(
+        //   top: 40,
+        //   right: 16,
+        //   child: Container(
+        //     decoration: BoxDecoration(
+        //       color: Colors.black.withOpacity(0.6),
+        //       borderRadius: BorderRadius.circular(4),
+        //     ),
+        //     child: PopupMenuButton<String>(
+        //       onSelected: (String quality) async {
+        //         String videoUrl = widget.reel['videoUrl'];
+        //         if (quality != 'auto') {
+        //           final Uri uri = Uri.parse(videoUrl);
+        //           final String baseUrl = uri.toString().replaceAll('video_h1.m3u8', '');
+        //           videoUrl = '${baseUrl}audio-video/$quality/stream.m3u8';
+        //         }
 
-                // Store current position and state
-                final position = await _videoController?.position;
-                final wasPlaying = _isPlaying;
+        //         // Store current position and state
+        //         final position = await _videoController?.position;
+        //         final wasPlaying = _isPlaying;
 
-                // Dispose old controller
-                await _videoController?.dispose();
+        //         // Dispose old controller
+        //         await _videoController?.dispose();
 
-                // Create new controller with CORS headers
-                _videoController = VideoPlayerController.networkUrl(
-                  Uri.parse(videoUrl),
-                  videoPlayerOptions: VideoPlayerOptions(
-                    mixWithOthers: false,
-                  ),
-                  httpHeaders: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                    'Accept': '*/*',
-                    'Origin': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-                    'Access-Control-Allow-Headers': 'Origin, Content-Type',
-                  },
-                );
+        //         // Create new controller with CORS headers
+        //         _videoController = VideoPlayerController.networkUrl(
+        //           Uri.parse(videoUrl),
+        //           videoPlayerOptions: VideoPlayerOptions(
+        //             mixWithOthers: false,
+        //           ),
+        //           httpHeaders: {
+        //             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        //             'Accept': '*/*',
+        //             'Origin': '*',
+        //             'Access-Control-Allow-Origin': '*',
+        //             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        //             'Access-Control-Allow-Headers': 'Origin, Content-Type',
+        //           },
+        //         );
 
-                // Initialize and restore state
-                _videoController!.addListener(_videoListener);
-                await _videoController!.initialize();
-                await _videoController!.seekTo(position ?? Duration.zero);
+        //         // Initialize and restore state
+        //         _videoController!.addListener(_videoListener);
+        //         await _videoController!.initialize();
+        //         await _videoController!.seekTo(position ?? Duration.zero);
                 
-                if (mounted) {
-                  setState(() {});
-                  if (wasPlaying) {
-                    _videoController?.play();
-                  }
-                }
-              },
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                const PopupMenuItem<String>(
-                  value: 'auto',
-                  child: Text('Auto', style: TextStyle(color: Colors.white)),
-                ),
-                const PopupMenuItem<String>(
-                  value: '1080',
-                  child: Text('1080p', style: TextStyle(color: Colors.white)),
-                ),
-                const PopupMenuItem<String>(
-                  value: '720',
-                  child: Text('720p', style: TextStyle(color: Colors.white)),
-                ),
-                const PopupMenuItem<String>(
-                  value: '480',
-                  child: Text('480p', style: TextStyle(color: Colors.white)),
-                ),
-              ],
-              color: Colors.black87,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.settings, color: Colors.white, size: 16),
-                    SizedBox(width: 4),
-                    Text(
-                      'Quality',
-                      style: TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
+        //         if (mounted) {
+        //           setState(() {});
+        //           if (wasPlaying) {
+        //             _videoController?.play();
+        //           }
+        //         }
+        //       },
+        //       itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+        //         const PopupMenuItem<String>(
+        //           value: 'auto',
+        //           child: Text('Auto', style: TextStyle(color: Colors.white)),
+        //         ),
+        //         const PopupMenuItem<String>(
+        //           value: '1080',
+        //           child: Text('1080p', style: TextStyle(color: Colors.white)),
+        //         ),
+        //         const PopupMenuItem<String>(
+        //           value: '720',
+        //           child: Text('720p', style: TextStyle(color: Colors.white)),
+        //         ),
+        //         const PopupMenuItem<String>(
+        //           value: '480',
+        //           child: Text('480p', style: TextStyle(color: Colors.white)),
+        //         ),
+        //       ],
+        //       color: Colors.black87,
+        //       child: Padding(
+        //         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        //         child: Row(
+        //           mainAxisSize: MainAxisSize.min,
+        //           children: const [
+        //             Icon(Icons.settings, color: Colors.white, size: 16),
+        //             SizedBox(width: 4),
+        //             Text(
+        //               'Quality',
+        //               style: TextStyle(color: Colors.white, fontSize: 12),
+        //             ),
+        //           ],
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ),
         // Error indicator
         if (_videoController?.value.hasError ?? false)
           Container(
@@ -401,6 +401,7 @@ class _ReelItemState extends State<ReelItem> {
               ),
             ),
           ),
+     
       ],
     );
   }
@@ -490,31 +491,32 @@ class _ReelItemState extends State<ReelItem> {
     return LayoutBuilder(
       builder: (context, constraints) {
         return Stack(
+          fit: StackFit.expand,
           children: [
             // Media content
-            Positioned.fill(
-              child: _buildMediaContent(),
-            ),
+             _buildMediaContent(),
+            
             // Gradient overlay for better text visibility
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.7),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            // Positioned.fill(
+            //   child: Container(
+            //     color: Colors.black,
+            //     // decoration: BoxDecoration(
+            //     //   gradient: LinearGradient(
+            //     //     begin: Alignment.topCenter,
+            //     //     end: Alignment.bottomCenter,
+            //     //     colors: [
+            //     //       Colors.transparent,
+            //     //       Colors.black.withOpacity(0.7),
+            //     //     ],
+            //     //   ),
+            //     // ),
+            //   ),
+            // ),
             // Rest of the UI (username, description, etc.)
         Positioned(
           bottom: 20,
           left: 10,
-              right: 60,
+          right: 60,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -626,6 +628,8 @@ class _ReelItemState extends State<ReelItem> {
             ],
           ),
         ),
+      
+      
       ],
         );
       },

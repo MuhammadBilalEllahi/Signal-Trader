@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tradingapp/pages/root/profile/components/PaymentPage.dart';
 
 class SubscriptionPlans extends StatelessWidget {
   const SubscriptionPlans({super.key});
@@ -74,28 +75,15 @@ class SubscriptionPlans extends StatelessWidget {
                     isPopular: true,
                     onSubscribe: () {
                       // Handle pro plan subscription
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PaymentPage(selectedPlan: 0),
+                        ),
+                      );
                     },
                   ),
-                  const SizedBox(height: 16),
-                  _buildPlanCard(
-                    context,
-                    title: "Elite Trader",
-                    price: "\$99.99",
-                    period: "per month",
-                    features: [
-                      "Everything in Pro Trader",
-                      "1-on-1 Mentoring",
-                      "Custom Trading Strategies",
-                      "Risk Management Tools",
-                      "Portfolio Analysis",
-                      "24/7 Premium Support",
-                    ],
-                    isPopular: false,
-                    onSubscribe: () {
-                      // Handle elite plan subscription
-                    },
-                  ),
-                ],
+                 ],
               ),
             ),
           ],
