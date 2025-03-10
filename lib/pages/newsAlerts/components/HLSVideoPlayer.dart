@@ -290,6 +290,7 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
   @override
   Widget build(BuildContext context) {
     return Stack(
+      fit: StackFit.expand,
       alignment: Alignment.center,
       children: [
         // Base video player
@@ -368,63 +369,17 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
             ),
           ),
 
-        // Quality selector (moved up in the stack)
-        if (_qualityOptions.isNotEmpty)
-          Positioned(
-            top: 16,
-            right: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: PopupMenuButton<String>(
-                onSelected: _changeQuality,
-                itemBuilder: (context) => _qualityOptions.keys
-                    .map((quality) => PopupMenuItem<String>(
-                          value: quality,
-                          child: Row(
-                            children: [
-                              if (quality == _currentQuality)
-                                const Icon(Icons.check, size: 16, color: Colors.white),
-                              const SizedBox(width: 8),
-                              Text(
-                                quality,
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ))
-                    .toList(),
-                color: Colors.black87,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.settings, color: Colors.white, size: 16),
-                      const SizedBox(width: 4),
-                      Text(
-                        _currentQuality,
-                        style: const TextStyle(color: Colors.white, fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-
+        
         // Buffering indicator
-        if (_isBuffering)
-          Container(
-            color: Colors.black26,
-            child: const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            ),
-          ),
+        // if (_isBuffering)
+        //   Container(
+        //     color: Colors.black26,
+        //     child: const Center(
+        //       child: CircularProgressIndicator(
+        //         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        //       ),
+        //     ),
+        //   ),
 
         // Play/Pause overlay
         if (_showControls)
@@ -478,7 +433,55 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
               ],
             ),
           ),
+          // Quality selector (moved up in the stack)
+        if (_qualityOptions.isNotEmpty)
+          Positioned(
+            top: 16,
+            right: 16,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.6),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: PopupMenuButton<String>(
+                onSelected: _changeQuality,
+                itemBuilder: (context) => _qualityOptions.keys
+                    .map((quality) => PopupMenuItem<String>(
+                          value: quality,
+                          child: Row(
+                            children: [
+                              if (quality == _currentQuality)
+                                const Icon(Icons.check, size: 16, color: Colors.white),
+                              const SizedBox(width: 8),
+                              Text(
+                                quality,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ))
+                    .toList(),
+                color: Colors.black87,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.settings, color: Colors.white, size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        _currentQuality,
+                        style: const TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
       ],
+      
     );
   }
 

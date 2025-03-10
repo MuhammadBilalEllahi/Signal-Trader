@@ -77,7 +77,10 @@ class _NewsAlertsState extends State<NewsAlerts> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SizedBox.expand(
+      body:
+      Padding(
+        padding: const EdgeInsets.only(top: 25),
+        child: SizedBox.expand(
         child: PageView.builder(
         controller: _pageController,
         scrollDirection: Axis.vertical,
@@ -90,8 +93,8 @@ class _NewsAlertsState extends State<NewsAlerts> {
           return ReelItem(reel: reels[index]);
         },
         ),
-      ),
-    );
+        ),
+    ));
   }
 }
 
@@ -615,7 +618,8 @@ class _ReelItemState extends State<ReelItem> {
               ),
               const SizedBox(height: 20),
               IconButton(
-                icon: const Icon(Icons.comment_outlined, color: Colors.white),
+                icon: Icon(widget.reel['isSaved'] ?? false 
+                  ? Icons.bookmark : Icons.bookmark_border, color: Colors.white),
                 onPressed: () {},
               ),
               Text(
