@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:tradingapp/pages/root/home/components/FlChart.dart';
+import 'package:provider/provider.dart';
+import 'package:tradingapp/pages/root/home/components/CryptoPriceList.dart';
 import 'package:tradingapp/pages/root/home/components/HomeButtons.dart';
 import 'package:tradingapp/pages/services/constants/constants.dart';
+import 'package:tradingapp/providers/crypto_price_provider.dart';
 import 'package:tradingapp/theme/theme.dart';
 
 class Home extends StatefulWidget {
@@ -60,7 +62,7 @@ class _HomeState extends State<Home> {
         ),
         const SizedBox(height: 24),
         Text(
-          "Metrics",
+          "Quick Actions",
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -93,27 +95,7 @@ class _HomeState extends State<Home> {
           ],
         ),
         const SizedBox(height: 24),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Activity",
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const SizedBox(
-                  height: 200,
-                  child: LineChartSample2(),
-                ),
-              ],
-            ),
-          ),
-        ),
+        const CryptoPriceList(),
       ],
     );
   }

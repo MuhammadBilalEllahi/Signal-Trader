@@ -14,6 +14,7 @@ import 'package:tradingapp/theme/theme.dart';
 import 'package:tradingapp/pages/newsAlerts/providers/news_alerts_provider.dart';
 import 'package:tradingapp/pages/signals/providers/signals_provider.dart';
 import 'package:tradingapp/pages/root/profile/providers/profile_provider.dart';
+import 'package:tradingapp/providers/crypto_price_provider.dart';
 // import 'package:tradingapp/pages/services/firebase_options.dart';
 
 void main() async{
@@ -31,6 +32,7 @@ void main() async{
         ChangeNotifierProvider(create: (_) => NewsAlertsProvider()),
         ChangeNotifierProvider(create: (_) => SignalsProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => CryptoPriceProvider()),
       ]
       ,
       child:const MyApp()));

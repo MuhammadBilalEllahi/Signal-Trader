@@ -48,7 +48,7 @@ class Homebuttons extends StatelessWidget {
               icon,
               size: 35,
               color: isActive
-                  ? Theme.of(context).primaryColorLight.withValues(alpha: 0.99)
+                  ? Theme.of(context).scaffoldBackgroundColor
                   : Theme.of(context).iconTheme.color,
             ),
           ),
