@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tradingapp/pages/root/profile/components/PaymentSuccessPage.dart';
 
 class CreditCardPage extends StatefulWidget {
   final String amount;
@@ -354,8 +355,17 @@ class _CreditCardPageState extends State<CreditCardPage> {
                                         setState(() => _isProcessing = true);
                                         // Add payment processing logic here
                                         await Future.delayed(const Duration(seconds: 2));
-                                        setState(() => _isProcessing = false);
-                                        // Navigate back or show success
+                                        if (mounted) {
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => PaymentSuccessPage(
+                                                planName: widget.planName,
+                                                amount: widget.amount,
+                                              ),
+                                            ),
+                                          );
+                                        }
                                       }
                                     },
                               style: ElevatedButton.styleFrom(
