@@ -61,40 +61,40 @@ class _HomeState extends State<Home> {
           ),
         ),
         const SizedBox(height: 24),
-        Text(
-          "Quick Actions",
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Homebuttons(
-              onTap: () {},
-              icon: Icons.money_sharp,
-              isActive: true,
-              text: "Payments",
-            ),
-            Homebuttons(
-              onTap: () {},
-              icon: Icons.arrow_forward,
-              text: "Send",
-            ),
-            Homebuttons(
-              onTap: () {},
-              icon: Icons.people,
-              text: "Peers",
-            ),
-            Homebuttons(
-              onTap: () {},
-              icon: Icons.more_horiz_outlined,
-              text: "More",
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
+        // Text(
+        //   "Quick Actions",
+        //   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+        //     fontWeight: FontWeight.w600,
+        //   ),
+        // ),
+        // const SizedBox(height: 16),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        //   children: [
+        //     Homebuttons(
+        //       onTap: () {},
+        //       icon: Icons.money_sharp,
+        //       isActive: true,
+        //       text: "Payments",
+        //     ),
+        //     Homebuttons(
+        //       onTap: () {},
+        //       icon: Icons.arrow_forward,
+        //       text: "Send",
+        //     ),
+        //     Homebuttons(
+        //       onTap: () {},
+        //       icon: Icons.people,
+        //       text: "Peers",
+        //     ),
+        //     Homebuttons(
+        //       onTap: () {},
+        //       icon: Icons.more_horiz_outlined,
+        //       text: "More",
+        //     ),
+        //   ],
+        // ),
+        // const SizedBox(height: 24),
         const CryptoPriceList(),
       ],
     );

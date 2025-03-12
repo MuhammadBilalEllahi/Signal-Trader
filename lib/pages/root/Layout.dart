@@ -5,6 +5,7 @@ import 'package:tradingapp/pages/messages/ChatListScreen.dart';
 import 'package:tradingapp/pages/newsAlerts/NewsAlerts.dart';
 import 'package:tradingapp/pages/root/profile/Profile.dart';
 import 'package:tradingapp/pages/root/profile/components/ProfileImage.dart';
+import 'package:tradingapp/pages/root/subscription/SubscriptionPage.dart';
 import 'package:tradingapp/pages/signals/SignalsPage.dart';
 
 import 'home/Home.dart';
@@ -127,7 +128,8 @@ class _LayoutState extends State<Layout> {
                 SignalsPage(),
                 NewsAlerts(),
                 Home(),
-                ChatListScreen(),
+                SubscriptionPage(),
+                // ChatListScreen(),
                 ProfileImage(),
               ],
             ),
@@ -178,7 +180,7 @@ class _LayoutState extends State<Layout> {
             ),
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.news, size: 20),
-              label: "News/Updates",
+              label: "Analysis",
               activeIcon: Icon(CupertinoIcons.news_solid, size: 20),
             ),
             BottomNavigationBarItem(
@@ -186,10 +188,15 @@ class _LayoutState extends State<Layout> {
               label: "Home",
               activeIcon: Icon(Icons.home, size: 20),
             ),
+            // BottomNavigationBarItem(
+            //   icon: Icon(CupertinoIcons.chat_bubble_text, size: 20),
+            //   label: "Chat",
+            //   activeIcon: Icon(CupertinoIcons.chat_bubble_text_fill, size: 20),
+            // ),
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.chat_bubble_text, size: 20),
-              label: "Chat",
-              activeIcon: Icon(CupertinoIcons.chat_bubble_text_fill, size: 20),
+              icon: Icon(CupertinoIcons.creditcard, size: 20),
+              label: "Plans",
+              activeIcon: Icon(CupertinoIcons.creditcard_fill, size: 20),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline_sharp, size: 20),
