@@ -17,106 +17,84 @@ class _ProfileImageState extends State<ProfileImage> {
 
   Widget _buildSubscriptionCard() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Theme.of(context).colorScheme.primary.withOpacity(0.8),
+            Theme.of(context).colorScheme.primary.withOpacity(0.7),
             Theme.of(context).colorScheme.primary,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              const Icon(
+                Icons.star,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: const [
                   Text(
                     'Free Plan',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
-                      fontSize: 14,
+                      color: Colors.white,
+                      fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  const Text(
+                  Text(
                     'Upgrade to Pro',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               ),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.star,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            'Get access to premium features and exclusive trading signals',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
-              fontSize: 14,
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PaymentPage(),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Theme.of(context).colorScheme.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const PaymentPage(),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Theme.of(context).colorScheme.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    'Subscribe Now',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+            child: const Text(
+              'Subscribe',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
               ),
-            ],
+            ),
           ),
         ],
       ),
@@ -204,7 +182,7 @@ class _ProfileImageState extends State<ProfileImage> {
                 ),
                 Container(
                   width: 250,
-                  height: 290,
+                  height: 270,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     color: Colors.amber,
@@ -226,7 +204,7 @@ class _ProfileImageState extends State<ProfileImage> {
                           },
                           child: Container(
                             width: 250,
-                            height: 290,
+                            height: 270,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
                               color: Colors.amber,
@@ -255,7 +233,7 @@ class _ProfileImageState extends State<ProfileImage> {
                              Image.network(
                               profileImage,
                               width: 250,
-                              height: 290,
+                              height: 270,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) =>
                                   const SizedBox(),
@@ -263,7 +241,7 @@ class _ProfileImageState extends State<ProfileImage> {
                             :  Image.asset(
                                "assets/images/user.png",
                               width: 250,
-                              height: 290,
+                              height: 270,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) =>
                                   const SizedBox(),
@@ -275,9 +253,10 @@ class _ProfileImageState extends State<ProfileImage> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(10, 25, 10, 10),
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                  Text(
                   name,

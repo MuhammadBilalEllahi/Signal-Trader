@@ -87,7 +87,7 @@ class CryptoPriceList extends StatelessWidget {
                             child: Text(
                               price.symbol.substring(0, 3),
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 10,
                                 fontWeight: FontWeight.w600,
                                 color: Theme.of(context).colorScheme.onSecondaryContainer,
                               ),

@@ -39,6 +39,8 @@ class SignalsProvider extends ChangeNotifier {
           _currentPage = 2;
           if (index != null) {
             _currentIndex = index;
+          } else {
+            _currentIndex = 0;
           }
         } else {
           _signals.addAll(newSignals);
@@ -61,7 +63,9 @@ class SignalsProvider extends ChangeNotifier {
   }
 
   void setCurrentIndex(int index) {
-    _currentIndex = index;
-    notifyListeners();
+    if (index >= 0 && index < _signals.length) {
+      _currentIndex = index;
+      notifyListeners();
+    }
   }
 } 

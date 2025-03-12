@@ -19,8 +19,7 @@ class CurrentSignalsPage extends StatefulWidget {
 
 class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
   bool isVertical = false;
-  int currentIndex = 0;
-  final ScrollController _scrollController = ScrollController();
+  final PageController _pageController = PageController();
   late IO.Socket socket;
 
   // Filter state variables
@@ -44,7 +43,6 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
     _loadViewPreference();
     _initializeData();
     _connectSocket();
-    _scrollController.addListener(_onScroll);
   }
 
   Future<void> _initializeData() async {
@@ -54,8 +52,7 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -136,15 +133,6 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
     });
 
     socket.onDisconnect((_) => debugPrint('Disconnected from WebSocket'));
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 50) {
-      final provider = Provider.of<SignalsProvider>(context, listen: false);
-      if (!provider.isLoading && provider.hasMore) {
-        provider.fetchSignals();
-      }
-    }
   }
 
   void _showFilterDialog() {
@@ -340,6 +328,7 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
     return Consumer<SignalsProvider>(
       builder: (context, signalsProvider, child) {
         final filteredSignals = getFilteredSignals(signalsProvider.signals);
+        final currentIndex = signalsProvider.currentIndex;
         
         return RefreshIndicator(
           onRefresh: () => signalsProvider.fetchSignals(refresh: true),
@@ -388,28 +377,22 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
                           },
                         ),
                       )
-                    : NotificationListener<ScrollNotification>(
-                        onNotification: (scrollNotification) {
-                          if (scrollNotification.metrics.pixels >= scrollNotification.metrics.maxScrollExtent - 50 &&
-                              signalsProvider.hasMore && !signalsProvider.isLoading) {
-                            signalsProvider.fetchSignals();
+                    : PageView.builder(
+                        controller: _pageController,
+                        itemCount: signalsProvider.isLoading ? filteredSignals.length + 1 : filteredSignals.length,
+                        onPageChanged: (index) {
+                          final provider = Provider.of<SignalsProvider>(context, listen: false);
+                          provider.setCurrentIndex(index);
+                          if (index == filteredSignals.length - 1 && signalsProvider.hasMore) {
+                            provider.fetchSignals();
                           }
-                          return false;
                         },
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          controller: _scrollController,
-                          child: Row(
-                            children: [
-                              ...filteredSignals.map((signal) => SignalCard(signal, showAnalysis: true)),
-                              if (signalsProvider.isLoading) ...[
-                                ShimmerSignalCard(600),
-                                ShimmerSignalCard(600),
-                                ShimmerSignalCard(600),
-                              ],
-                            ],
-                          ),
-                        ),
+                        itemBuilder: (context, index) {
+                          if (index == filteredSignals.length && signalsProvider.isLoading) {
+                            return ShimmerSignalCard(100);
+                          }
+                          return SignalCard(filteredSignals[index], showAnalysis: true);
+                        },
                       ),
               ),
               if (!isVertical) ...[
@@ -421,7 +404,10 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
                       onPressed: () {
                         final provider = Provider.of<SignalsProvider>(context, listen: false);
                         if (currentIndex > 0) {
-                          provider.fetchSignals(refresh: true);
+                          provider.setCurrentIndex(currentIndex - 1);
+                          _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                        } else if (!signalsProvider.isLoading && signalsProvider.hasMore) {
+                          provider.fetchSignals();
                         }
                       },
                       child: const Text("Prev"),
@@ -432,7 +418,8 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
                           .map((index) =>  TextButton(
                                   onPressed: () {
                                     final provider = Provider.of<SignalsProvider>(context, listen: false);
-                                    provider.fetchSignals(refresh: true, index: index);
+                                    provider.setCurrentIndex(index);
+                                    _pageController.jumpToPage(index);
                                   },
                                   style: TextButton.styleFrom(
                                     backgroundColor: currentIndex == index ? Colors.yellow : Colors.transparent,
@@ -445,7 +432,6 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
                                       color: currentIndex == index ?   Colors.black: Colors.white,
                                     ),
                                   ),
-                              
                               ))
                           .toList(),
                     ),
@@ -453,7 +439,10 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
                       onPressed: () {
                         final provider = Provider.of<SignalsProvider>(context, listen: false);
                         if (currentIndex < filteredSignals.length - 1) {
-                          provider.fetchSignals(refresh: true, index: currentIndex + 1);
+                          provider.setCurrentIndex(currentIndex + 1);
+                          _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                        } else if (!signalsProvider.isLoading && signalsProvider.hasMore) {
+                          provider.fetchSignals();
                         }
                       },
                       child: const Text("Next"),

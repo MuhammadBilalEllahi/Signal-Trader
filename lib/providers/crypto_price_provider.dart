@@ -42,9 +42,12 @@ class CryptoPriceProvider extends ChangeNotifier {
   StreamSubscription? _subscription;
   bool _isDisposed = false;
   Timer? _pingTimer;
+  Timer? _updateTimer;
+  Timer? _reconnectTimer;
   DateTime? _lastUpdateTime;
   static const _pingInterval = Duration(seconds: 30);
-  static const _reconnectThreshold = Duration(seconds: 5);
+  static const _updateInterval = Duration(seconds: 1);
+  static const _reconnectDelay = Duration(seconds: 5);
 
   final List<String> _symbols = [
     'BTCUSDT',
@@ -54,7 +57,7 @@ class CryptoPriceProvider extends ChangeNotifier {
     'DOGEUSDT',
     'XRPUSDT',
     'DOTUSDT',
-    // 'UNIUSDT'
+    'UNIUSDT'
   ];
 
   // Factory constructor
@@ -67,6 +70,7 @@ class CryptoPriceProvider extends ChangeNotifier {
   CryptoPriceProvider._internal() {
     _initWebSocket();
     _startPingTimer();
+    _startUpdateTimer();
   }
 
   void _startPingTimer() {
@@ -74,6 +78,15 @@ class CryptoPriceProvider extends ChangeNotifier {
     _pingTimer = Timer.periodic(_pingInterval, (timer) {
       if (!_isDisposed && _channel != null) {
         _channel?.sink.add('ping');
+      }
+    });
+  }
+
+  void _startUpdateTimer() {
+    _updateTimer?.cancel();
+    _updateTimer = Timer.periodic(_updateInterval, (timer) {
+      if (!_isDisposed) {
+        notifyListeners();
       }
     });
   }
@@ -91,7 +104,7 @@ class CryptoPriceProvider extends ChangeNotifier {
 
     // Connect to combined streams with compression
     _channel = WebSocketChannel.connect(
-      Uri.parse('wss://stream.binance.com:9443/stream?streams=${streams.join("/")}&compression=true'),
+      Uri.parse('wss://stream.binance.com:9443/stream?streams=${streams.join("/")}'),
     );
 
     _subscription = _channel?.stream.listen(
@@ -103,7 +116,6 @@ class CryptoPriceProvider extends ChangeNotifier {
             final price = CryptoPrice.fromJson(data['data']);
             _prices[price.symbol] = price;
             _lastUpdateTime = DateTime.now();
-            notifyListeners();
           }
         } catch (e) {
           debugPrint('Error processing message: $e');
@@ -111,11 +123,11 @@ class CryptoPriceProvider extends ChangeNotifier {
       },
       onError: (error) {
         debugPrint('WebSocket error: $error');
-        _reconnect();
+        _scheduleReconnect();
       },
       onDone: () {
         debugPrint('WebSocket connection closed');
-        _reconnect();
+        _scheduleReconnect();
       },
     );
   }
@@ -127,18 +139,10 @@ class CryptoPriceProvider extends ChangeNotifier {
     _channel = null;
   }
 
-  void _reconnect() {
+  void _scheduleReconnect() {
     if (_isDisposed) return;
-    
-    // Check if we need to reconnect based on last update time
-    if (_lastUpdateTime != null) {
-      final timeSinceLastUpdate = DateTime.now().difference(_lastUpdateTime!);
-      if (timeSinceLastUpdate < _reconnectThreshold) {
-        return; // Don't reconnect if we're still getting updates
-      }
-    }
-
-    Future.delayed(const Duration(milliseconds: 500), () {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = Timer(_reconnectDelay, () {
       _initWebSocket();
     });
   }
@@ -162,6 +166,8 @@ class CryptoPriceProvider extends ChangeNotifier {
     _isDisposed = true;
     _closeConnection();
     _pingTimer?.cancel();
+    _updateTimer?.cancel();
+    _reconnectTimer?.cancel();
     _instance = null;
     super.dispose();
   }
