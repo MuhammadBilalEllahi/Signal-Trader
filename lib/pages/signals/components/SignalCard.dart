@@ -7,6 +7,7 @@ class SignalCard extends StatefulWidget {
   final Map<String, dynamic> signal;
   final bool showAnalysis;
 
+
   const SignalCard(this.signal, {this.showAnalysis = false, super.key});
 
   @override
@@ -17,10 +18,12 @@ class _SignalCardState extends State<SignalCard> {
   bool isFavorite = false;
   bool showFullAnalysis = false;
 
+
   @override
   void initState() {
     super.initState();
     isFavorite = widget.signal['isFavorite'] ?? false;
+    debugPrint('wiget.signal ${widget.signal}');
   }
 
   Future<void> toggleFavorite() async {
@@ -39,8 +42,8 @@ class _SignalCardState extends State<SignalCard> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     LinearGradient getGradient() {
-      switch (type.toLowerCase()) {
-        case 'gold':
+      switch (type.toUpperCase()) {
+        case 'GOLD':
           return LinearGradient(
             colors: [
               Colors.yellow.shade700,
@@ -50,7 +53,7 @@ class _SignalCardState extends State<SignalCard> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           );
-        case 'crypto':
+        case 'CRYPTO':
           return LinearGradient(
             colors: isDark ? [
               Colors.grey.shade700,
@@ -64,7 +67,7 @@ class _SignalCardState extends State<SignalCard> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           );
-        case 'stocks':
+        case 'STOCKS':
           return LinearGradient(
             colors: [
               Colors.black87,
@@ -87,18 +90,18 @@ class _SignalCardState extends State<SignalCard> {
     }
 
     Color getTextColor() {
-      switch (type.toLowerCase()) {
-        case 'gold':
+      switch (type.toUpperCase()) {
+        case 'GOLD':
           return Colors.black87;
-        case 'crypto':
+        case 'CRYPTO':
           return isDark ? Colors.white : Colors.black87;
-        case 'stocks':
+        case 'STOCKS':
           return Colors.white;
         default:
           return Theme.of(context).colorScheme.onPrimary;
       }
     }
-
+debugPrint("${widget.signal['type']} ${widget.signal['coin']} ${widget.signal['direction']}",);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
       margin: const EdgeInsets.only(left: 8),
@@ -143,7 +146,7 @@ class _SignalCardState extends State<SignalCard> {
             Expanded(
               child: Row(
                     children: [
-                  if (widget.signal["type"] != "gold") 
+                  if (widget.signal["type"].toUpperCase() != "GOLD") 
                     Text(
                       widget.signal["coin"],
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -170,12 +173,12 @@ class _SignalCardState extends State<SignalCard> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                         decoration: BoxDecoration(
-                    color: widget.signal['direction'].toString().toLowerCase() == 'long'
+                    color: widget.signal['direction'].toString().toUpperCase() == 'LONG'
                         ? Colors.green.withOpacity(isDark ? 0.1 : 0.05)
                         : Colors.red.withOpacity(isDark ? 0.1 : 0.05),
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
-                      color: widget.signal['direction'].toString().toLowerCase() == 'long'
+                      color: widget.signal['direction'].toString().toUpperCase() == 'LONG'
                           ? Colors.green.withOpacity(0.3)
                           : Colors.red.withOpacity(0.3),
                       width: 1,
@@ -184,7 +187,7 @@ class _SignalCardState extends State<SignalCard> {
                           child: Text(
                     widget.signal['direction'],
                             style: TextStyle(
-                      color: widget.signal['direction'].toString().toLowerCase() == 'long'
+                      color: widget.signal['direction'].toString().toUpperCase() == 'LONG'
                           ? Colors.green.withOpacity(0.8)
                           : Colors.red.withOpacity(0.8),
                               fontSize: 12,

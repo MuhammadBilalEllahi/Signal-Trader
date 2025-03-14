@@ -32,6 +32,7 @@ class SignalsProvider extends ChangeNotifier {
       final response = await apiClient.get("signals/paginated?pageId=${refresh ? 1 : _currentPage}&pageSize=5");
 
       if (response != null && response.containsKey("signals")) {
+        debugPrint("response -----------signals ${response['signals']}");
         List<Map<String, dynamic>> newSignals = List<Map<String, dynamic>>.from(response["signals"]);
 
         if (refresh) {

@@ -5,6 +5,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:tradingapp/pages/newsAlerts/providers/news_alerts_provider.dart';
 import 'package:tradingapp/pages/newsAlerts/components/HLSVideoPlayer.dart';
+import 'package:tradingapp/pages/newsAlerts/services/news_alerts_service.dart';
 
 class NewsAlerts extends StatefulWidget {
   const NewsAlerts({super.key});
@@ -15,57 +16,51 @@ class NewsAlerts extends StatefulWidget {
 
 class _NewsAlertsState extends State<NewsAlerts> {
   late PageController _pageController;
-  List<Map<String, dynamic>> reels = [
-    {
-      'type': 'video',
-      'videoUrl': 'https://flipfit-cdn.akamaized.net/flip_hls/661f570aab9d840019942b80-473e0b/video_h1.m3u8',
-      'username': 'crypto_analyst',
-      'description': 'Gold price analysis and market trends for the week',
-      'likes': 1234,
-      'comments': 89,
-      'contentType': 'gold'
-    },
-    {
-      'type': 'image',
-      'images': [
-        'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80',
-      ],
-      'username': 'btc_trader',
-      'description': 'Bitcoin technical analysis and support levels',
-      'likes': 2345,
-      'comments': 156,
-      'contentType': 'crypto'
-    },
-     {
-      'type': 'video',
-      'videoUrl': 'https://flipfit-cdn.akamaized.net/flip_hls/661f570aab9d840019942b80-473e0b/video_h1.m3u8',
-      'username': 'crypto_analyst',
-      'description': 'Gold price analysis and market trends for the week',
-      'likes': 1234,
-      'comments': 89,
-      'contentType': 'gold'
-    },
-    {
-      'type': 'image',
-      'images': [
-        'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-        'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-        'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-      ],
-      'username': 'stock_master',
-      'description': 'Stock market overview and trading opportunities',
-      'likes': 3456,
-      'comments': 234,
-      'contentType': 'stocks'
-    },
-  ];
+  final NewsAlertsService _newsAlertsService = NewsAlertsService();
+  List<Map<String, dynamic>> reels = [];
+  bool _isLoading = true;
+  int _currentPage = 1;
+  bool _hasMore = true;
+  static const int _pageSize = 10;
 
   @override
   void initState() {
     super.initState();
-    // Initialize PageController with the saved index
     final provider = Provider.of<NewsAlertsProvider>(context, listen: false);
     _pageController = PageController(initialPage: provider.currentReelIndex);
+    _loadInitialReels();
+  }
+
+  Future<void> _loadInitialReels() async {
+    setState(() => _isLoading = true);
+    final newsAlerts = await _newsAlertsService.fetchNewsAlerts(page: _currentPage, limit: _pageSize);
+    
+    if (mounted) {
+      setState(() {
+        reels = newsAlerts;
+        _isLoading = false;
+        _hasMore = newsAlerts.length >= _pageSize;
+      });
+    }
+  }
+
+  Future<void> _loadMoreReels() async {
+    if (!_hasMore || _isLoading) return;
+
+    setState(() => _isLoading = true);
+    final moreNewsAlerts = await _newsAlertsService.fetchNewsAlerts(
+      page: _currentPage + 1,
+      limit: _pageSize,
+    );
+
+    if (mounted) {
+      setState(() {
+        reels.addAll(moreNewsAlerts);
+        _currentPage++;
+        _isLoading = false;
+        _hasMore = moreNewsAlerts.length >= _pageSize;
+      });
+    }
   }
 
   @override
@@ -76,25 +71,48 @@ class _NewsAlertsState extends State<NewsAlerts> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading && reels.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (reels.isEmpty) {
+      return const Center(child: Text('No news alerts available'));
+    }
+
     return Scaffold(
-      body:
-      Padding(
+      body: Padding(
         padding: const EdgeInsets.only(top: 25),
         child: SizedBox.expand(
-        child: PageView.builder(
-        controller: _pageController,
-        scrollDirection: Axis.vertical,
-        itemCount: reels.length,
-          onPageChanged: (index) {
-            Provider.of<NewsAlertsProvider>(context, listen: false)
-                .setCurrentReelIndex(index);
-          },
-        itemBuilder: (context, index) {
-          return ReelItem(reel: reels[index]);
-        },
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+                _loadMoreReels();
+              }
+              return true;
+            },
+            child: PageView.builder(
+              controller: _pageController,
+              scrollDirection: Axis.vertical,
+              itemCount: reels.length + (_hasMore ? 1 : 0),
+              onPageChanged: (index) {
+                Provider.of<NewsAlertsProvider>(context, listen: false)
+                    .setCurrentReelIndex(index);
+                
+                if (index == reels.length - 2) {
+                  _loadMoreReels();
+                }
+              },
+              itemBuilder: (context, index) {
+                if (index == reels.length) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                return ReelItem(reel: reels[index]);
+              },
+            ),
+          ),
         ),
-        ),
-    ));
+      ),
+    );
   }
 }
 

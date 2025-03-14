@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'HLSVideoPlayer.dart';
 
 class ReelDetailedPage extends StatefulWidget {
   final Map<String, dynamic> reel;
@@ -12,47 +12,29 @@ class ReelDetailedPage extends StatefulWidget {
 }
 
 class _ReelDetailedPageState extends State<ReelDetailedPage> {
-  VideoPlayerController? _videoController;
-  bool _isPlaying = true;
   int _currentImageIndex = 0;
   late PageController _imagePageController;
+  final String _selectedQuality = '720p'; // Default quality
 
   @override
   void initState() {
     super.initState();
     _imagePageController = PageController();
-    _initializeController();
-  }
-
-  Future<void> _initializeController() async {
-    if (widget.reel['type'] == 'video') {
-      try {
-        _videoController = VideoPlayerController.networkUrl(
-          Uri.parse(widget.reel['videoUrl']),
-        );
-        
-        await _videoController?.initialize();
-        if (mounted) {
-          setState(() {});
-          _videoController?.play();
-          _videoController?.setLooping(true);
-        }
-      } catch (e) {
-        print('Error initializing video controller: $e');
-        if (mounted) {
-          setState(() {
-            _videoController = null;
-          });
-        }
-      }
-    }
   }
 
   @override
   void dispose() {
-    _videoController?.dispose();
     _imagePageController.dispose();
     super.dispose();
+  }
+
+  String _getVideoUrl() {
+    if (widget.reel['type'] == 'video' && widget.reel['videoFormats'] != null) {
+      // Use the selected quality or fallback to available quality
+      final formats = widget.reel['videoFormats'] as Map<String, dynamic>;
+      return formats[_selectedQuality] ?? formats['720p'] ?? formats['480p'] ?? formats['1080p'];
+    }
+    return '';
   }
 
   Widget _buildTypeBadge(String type) {
@@ -105,41 +87,31 @@ class _ReelDetailedPageState extends State<ReelDetailedPage> {
 
   Widget _buildMediaContent() {
     if (widget.reel['type'] == 'video') {
+      final videoUrl = _getVideoUrl();
+      if (videoUrl.isEmpty) {
+        return const Center(child: Text('Video not available', style: TextStyle(color: Colors.white)));
+      }
+      
       return AspectRatio(
-        aspectRatio: _videoController?.value.aspectRatio ?? 16 / 9,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isPlaying = !_isPlaying;
-                  _isPlaying ? _videoController?.play() : _videoController?.pause();
-                });
-              },
-              child: _videoController?.value.isInitialized == true
-                  ? VideoPlayer(_videoController!)
-                  : const Center(child: CircularProgressIndicator()),
-            ),
-            if (!_isPlaying)
-              Container(
-                color: Colors.black26,
-                child: const Icon(
-                  Icons.play_arrow,
-                  size: 50,
-                  color: Colors.white,
-                ),
-              ),
-          ],
+        aspectRatio: 16/9,
+        child: HLSVideoPlayer(
+          videoUrl: videoUrl,
+          videoId: widget.reel['_id'],
+          autoPlay: true,
+          looping: true,
         ),
       );
     } else {
-      final images = widget.reel['images'] as List<String>;
+      final images = widget.reel['images'] as List<dynamic>;
+      if (images.isEmpty) {
+        return const Center(child: Text('No images available', style: TextStyle(color: Colors.white)));
+      }
+
       if (images.length == 1) {
         return AspectRatio(
           aspectRatio: 16/9,
           child: Image.network(
-            images[0],
+            images[0]['large'] ?? images[0]['medium'] ?? images[0]['original'],
             fit: BoxFit.cover,
             width: double.infinity,
           ),
@@ -159,8 +131,9 @@ class _ReelDetailedPageState extends State<ReelDetailedPage> {
                   });
                 },
                 itemBuilder: (context, index) {
+                  final image = images[index];
                   return Image.network(
-                    images[index],
+                    image['large'] ?? image['medium'] ?? image['original'],
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: double.infinity,
