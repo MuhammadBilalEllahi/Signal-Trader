@@ -8,16 +8,23 @@ class HLSVideoPlayer extends StatefulWidget {
   final bool autoPlay;
   final bool looping;
   final String videoId;
-  // final bool isInReel;
+  final Map<String, dynamic>? videoFormats;
+  final VoidCallback? onDispose;
+  @override
+  final Key? key;
 
-   const HLSVideoPlayer({
-    super.key,
+  const HLSVideoPlayer({
+    this.key,
     required this.videoUrl,
     required this.videoId,
     this.autoPlay = true,
     this.looping = true,
-    // this.isInReel = false,
-  });
+    this.videoFormats,
+    this.onDispose,
+  }) : super(key: key);
+
+  _HLSVideoPlayerState? get state => _key.currentState;
+  static final GlobalKey<_HLSVideoPlayerState> _key = GlobalKey<_HLSVideoPlayerState>();
 
   @override
   State<HLSVideoPlayer> createState() => _HLSVideoPlayerState();
@@ -36,19 +43,35 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
   Duration _duration = Duration.zero;
   bool _isDragging = false;
   static final Map<String, Duration> _videoPositions = {};
+  bool _isQualityMenuOpen = false;
 
   @override
   void initState() {
     super.initState();
-    _initializePlayer(widget.videoUrl);
-    _fetchQualityOptions();
+    _initializePlayer();
+    _setupQualityOptions();
+  }
+
+  void _setupQualityOptions() {
+    if (widget.videoFormats != null) {
+      final formats = widget.videoFormats as Map<String, dynamic>;
+      Map<String, String> options = {'auto': formats['720p']};
+
+      if (formats['480p'] != null) options['480p'] = formats['480p'];
+      if (formats['720p'] != null) options['720p'] = formats['720p'];
+      if (formats['1080p'] != null) options['1080p'] = formats['1080p'];
+
+      setState(() {
+        _qualityOptions = options;
+      });
+    }
   }
 
   @override
   void didUpdateWidget(HLSVideoPlayer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.videoUrl != widget.videoUrl) {
-      _initializePlayer(widget.videoUrl);
+      _initializePlayer();
     }
   }
 
@@ -122,68 +145,30 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
     _startHideControlsTimer();
   }
 
-  Future<void> _fetchQualityOptions() async {
+  Future<void> _initializePlayer() async {
     try {
-      final response = await http.get(
-        Uri.parse(widget.videoUrl),
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          'Accept': '*/*',
-          'Origin': '*',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Origin, Content-Type',
-        },
-      );
-      
-      if (response.statusCode == 200) {
-        final manifest = response.body;
-        final lines = manifest.split('\n');
-        final baseUrl = widget.videoUrl.substring(0, widget.videoUrl.lastIndexOf('/') + 1);
-        
-        Map<String, String> options = {'auto': widget.videoUrl};
-        
-        for (int i = 0; i < lines.length; i++) {
-          if (lines[i].startsWith('#EXT-X-STREAM-INF')) {
-            final resolution = RegExp(r'RESOLUTION=(\d+x\d+)').firstMatch(lines[i])?.group(1);
-            if (resolution != null && i + 1 < lines.length) {
-              final height = resolution.split('x')[1];
-              final qualityUrl = lines[i + 1].startsWith('http') 
-                  ? lines[i + 1] 
-                  : baseUrl + lines[i + 1];
-              options['${height}p'] = qualityUrl;
-            }
-          }
-        }
-
-        if (mounted) {
-          setState(() {
-            _qualityOptions = options;
-          });
-        }
-      }
-    } catch (e) {
-      debugPrint('Error fetching quality options: $e');
-    }
-  }
-
-  Future<void> _initializePlayer(String url) async {
-    try {
-      // Dispose of the old controller if it exists
       await _controller?.dispose();
+
+      // Start with auto (720p) or fallback to available quality
+      final initialUrl = _qualityOptions['auto'] ??
+          _qualityOptions['720p'] ??
+          _qualityOptions['480p'] ??
+          _qualityOptions['1080p'] ??
+          '';
+
+      if (initialUrl.isEmpty) {
+        debugPrint('No valid video URL available');
+        return;
+      }
       
       _controller = VideoPlayerController.networkUrl(
-        Uri.parse(url),
+        Uri.parse(initialUrl),
         videoPlayerOptions: VideoPlayerOptions(
           mixWithOthers: false,
         ),
         httpHeaders: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          'Accept': '*/*',
-          'Origin': '*',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Origin, Content-Type',
+          'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         },
       );
 
@@ -195,6 +180,7 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
         setState(() {
           _isInitialized = true;
           _isPlaying = widget.autoPlay;
+          _duration = _controller!.value.duration;
         });
 
         // Restore previous position if exists
@@ -257,221 +243,155 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
   }
 
   Future<void> _changeQuality(String quality) async {
-    if (_qualityOptions.containsKey(quality)) {
+    if (!_qualityOptions.containsKey(quality)) return;
+
+    try {
       final newUrl = _qualityOptions[quality]!;
-      final position = await _controller?.position;
+      final currentPosition = await _controller?.position ?? Duration.zero;
       final wasPlaying = _isPlaying;
 
-      await _controller?.dispose();
-      await _initializePlayer(newUrl);
+      setState(() {
+        _isBuffering = true;
+        _isQualityMenuOpen = false;
+      });
 
-      if (position != null) {
-        await _controller?.seekTo(position);
-      }
+      await _controller?.dispose();
+
+      _controller = VideoPlayerController.networkUrl(
+        Uri.parse(newUrl),
+        videoPlayerOptions: VideoPlayerOptions(mixWithOthers: false),
+        httpHeaders: {
+          'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        },
+      );
+
+      _controller!.addListener(_videoListener);
+      await _controller!.initialize();
+      await _controller!.seekTo(currentPosition);
 
       if (wasPlaying) {
-        _controller?.play();
+        await _controller!.play();
       }
 
+      if (mounted) {
+        setState(() {
+          _currentQuality = quality;
+          _isBuffering = false;
+          _isInitialized = true;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error changing quality: $e');
       setState(() {
-        _currentQuality = quality;
+        _isBuffering = false;
       });
     }
   }
 
-// GestureDetector(
-//             onTapDown: _handleTap,
-//             child: AspectRatio(
-//               aspectRatio: _controller!.value.aspectRatio,
-//               child: ,
-//             ),
-//           )
+  Future<void> stopPlayback() async {
+    if (_controller != null) {
+      await _controller!.pause();
+      setState(() {
+        _isPlaying = false;
+      });
+    }
+  }
+
+  Future<void> pause() async {
+    if (_controller != null) {
+      await _controller!.pause();
+      setState(() {
+        _isPlaying = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       fit: StackFit.expand,
-      alignment: Alignment.center,
+
       children: [
-        // Base video player
+        // Video Player
         if (_isInitialized && _controller != null)
-        VideoPlayer(_controller!)
-          
-        else
-          const Center(child: CircularProgressIndicator()),
+          GestureDetector(
+            onTapDown: _handleTap,
+            onTap: () {
+                        setState(() {
+                _showControls = !_showControls;
+              });
+              if (_showControls) {
+                _startHideControlsTimer();
+              }
+            },
+            child: VideoPlayer(_controller!),
+          )
+        // else
+        //   const Center(child: CircularProgressIndicator())
+        ,
 
-        // Video Progress Bar (moved up in the stack)
-        if (_isInitialized && _controller != null)
-          Positioned(
-            width: MediaQuery.of(context).size.width *1.12,
-            bottom: -10, // Positioned under description, above bottom nav
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Progress Slider
-                  SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      activeTrackColor: Colors.white,
-                      inactiveTrackColor: Colors.white.withOpacity(0.3),
-                      thumbColor: Colors.white,
-                      overlayColor: Colors.white.withOpacity(0.2),
-                      trackHeight: 2,
-                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 4),
-                      overlayShape: const RoundSliderOverlayShape(overlayRadius: 8),
-                    ),
-                    child: Slider(
-                      value: _position.inMilliseconds.toDouble(),
-                      min: 0,
-                      max: _duration.inMilliseconds.toDouble(),
-                      onChanged: (value) {
-                        setState(() {
-                          _position = Duration(milliseconds: value.toInt());
-                        });
-                      },
-                      onChangeStart: (_) {
-                        setState(() {
-                          _isDragging = true;
-                        });
-                      },
-                      onChangeEnd: (value) {
-                        setState(() {
-                          _isDragging = false;
-                        });
-                        _controller?.seekTo(Duration(milliseconds: value.toInt()));
-                      },
-                    ),
-                  ),
-                  // Time indicators
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //   children: [
-                  //     Text(
-                  //       _formatDuration(_position),
-                  //       style: const TextStyle(
-                  //         color: Colors.white,
-                  //         fontSize: 12,
-                  //       ),
-                  //     ),
-                  //     Text(
-                  //       _formatDuration(_duration),
-                  //       style: const TextStyle(
-                  //         color: Colors.white,
-                  //         fontSize: 12,
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
-               
-                ],
-              ),
+        // Buffering Indicator
+        if (_isBuffering && _controller?.dataSource == null)
+          const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             ),
           ),
 
-        
-        // Buffering indicator
-        // if (_isBuffering)
-        //   Container(
-        //     color: Colors.black26,
-        //     child: const Center(
-        //       child: CircularProgressIndicator(
-        //         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-        //       ),
-        //     ),
-        //   ),
-
-        // Play/Pause overlay
+        // Video Controls
         if (_showControls)
-          AnimatedOpacity(
-            opacity: _showControls ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 200),
-            child: Container(
+          Container(
               color: Colors.black26,
-              child: Center(
-                child: Icon(
-                  _isPlaying ? Icons.pause : Icons.play_arrow,
-                  color: Colors.white,
-                  size: 50,
-                ),
-              ),
-            ),
-          ),
-
-        // Forward/Rewind indicators
-        if (_showControls)
-          Positioned.fill(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            height: double.infinity,
+            width: MediaQuery.of(context).size.width,
+            child: Column(
+              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // mainAxisSize: MainAxisSize.max,
               children: [
-                Container(
-                  width: MediaQuery.of(context).size.width / 3,
-                  color: Colors.transparent,
-                  child: const Center(
-                    child: Icon(
-                      Icons.replay_10,
-                      color: Colors.white,
-                      size: 40,
-                    ),
-                  ),
-                ),
-                Container(
-                  width: MediaQuery.of(context).size.width / 3,
-                  color: Colors.transparent,
-                ),
-                Container(
-                  width: MediaQuery.of(context).size.width / 3,
-                  color: Colors.transparent,
-                  child: const Center(
-                    child: Icon(
-                      Icons.forward_10,
-                      color: Colors.white,
-                      size: 40,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Quality selector (moved up in the stack)
-        if (_qualityOptions.isNotEmpty)
-          Positioned(
-            top: 16,
-            right: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
-                borderRadius: BorderRadius.circular(4),
-              ),
+                // Top Bar - Quality Selector
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
               child: PopupMenuButton<String>(
                 onSelected: _changeQuality,
-                itemBuilder: (context) => _qualityOptions.keys
-                    .map((quality) => PopupMenuItem<String>(
+                      itemBuilder: (context) =>
+                          _qualityOptions.keys.map((quality) {
+                        return PopupMenuItem<String>(
                           value: quality,
                           child: Row(
                             children: [
                               if (quality == _currentQuality)
-                                const Icon(Icons.check, size: 16, color: Colors.white),
+                                const Icon(Icons.check,
+                                    size: 16, color: Colors.white),
                               const SizedBox(width: 8),
                               Text(
-                                quality,
+                                quality.toUpperCase(),
                                 style: const TextStyle(color: Colors.white),
                               ),
                             ],
                           ),
-                        ))
-                    .toList(),
+                        );
+                      }).toList(),
                 color: Colors.black87,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.settings, color: Colors.white, size: 16),
+                            const Icon(Icons.settings,
+                                color: Colors.white, size: 16),
                       const SizedBox(width: 4),
                       Text(
-                        _currentQuality,
-                        style: const TextStyle(color: Colors.white, fontSize: 12),
+                              _currentQuality.toUpperCase(),
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 12),
                       ),
                     ],
                   ),
@@ -480,21 +400,102 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
             ),
           ),
 
+                SizedBox(height: MediaQuery.of(context).size.height * 0.8,
+                child: 
+
+                Center(
+                  child:  IconButton(
+                            icon: Icon(
+                              _isPlaying ? Icons.pause : Icons.play_arrow,
+                              color: Colors.white,
+                              size: 32,
+                            ),
+                            onPressed: _togglePlayPause,
+                          ),
+                ),
+                ),
+                // Bottom Bar - Progress and Controls
+                // Column(
+                //   mainAxisSize: MainAxisSize.max,
+                //   children: [
+
+                    
+                //     // Progress Bar
+
+                //     // Time and Controls
+                //     // Padding(
+                //     //   padding: const EdgeInsets.symmetric(
+                //     //       horizontal: 16, vertical: 8),
+                //     //   child: Row(
+                //     //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //     //     children: [
+                //     //       // Text(
+                //     //       //   _formatDuration(_position),
+                //     //       //   style: const TextStyle(color: Colors.white),
+                //     //       // ),
+                         
+                //     //       // Text(
+                //     //       //   _formatDuration(_duration),
+                //     //       //   style: const TextStyle(color: Colors.white),
+                //     //       // ),
+                //     //     ],
+                //     //   ),
+                //     // ),
+                //   ],
+                // ),
+              
+              ],
+            ),
+          ),
+
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: -15,
+          child: Container(
+            alignment: Alignment.bottomCenter,
+            width: MediaQuery.of(context).size.width * 1.2,
+            height: 50,
+            padding: const EdgeInsets.only(top: 16),
+            child: SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              activeTrackColor: Colors.white,
+              inactiveTrackColor: Colors.white24,
+              thumbColor: Colors.white,
+              trackHeight: 2,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+            ),
+            child: Slider(
+              value: _position.inMilliseconds.toDouble(),
+              min: 0,
+              max: _duration.inMilliseconds.toDouble(),
+              onChanged: (value) {
+                setState(() {
+                  _position = Duration(milliseconds: value.toInt());
+                });
+              },
+              onChangeStart: (_) => setState(() => _isDragging = true),
+              onChangeEnd: (value) {
+                setState(() => _isDragging = false);
+                _controller?.seekTo(Duration(milliseconds: value.toInt()));
+                },
+              ),
+            ),
+          ),
+        ),
       ],
-      
     );
   }
 
   @override
   void dispose() {
-    // Save final position before disposing
     if (_controller != null) {
       _videoPositions[widget.videoId] = _controller!.value.position;
     }
-    
     _hideControlsTimer?.cancel();
     _controller?.removeListener(_videoListener);
     _controller?.dispose();
+    widget.onDispose?.call();
     super.dispose();
   }
 } 

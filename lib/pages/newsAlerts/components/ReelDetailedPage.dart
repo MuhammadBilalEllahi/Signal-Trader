@@ -14,6 +14,7 @@ class ReelDetailedPage extends StatefulWidget {
 class _ReelDetailedPageState extends State<ReelDetailedPage> {
   int _currentImageIndex = 0;
   late PageController _imagePageController;
+  HLSVideoPlayer? _videoPlayer;
   final String _selectedQuality = '720p'; // Default quality
 
   @override
@@ -30,9 +31,8 @@ class _ReelDetailedPageState extends State<ReelDetailedPage> {
 
   String _getVideoUrl() {
     if (widget.reel['type'] == 'video' && widget.reel['videoFormats'] != null) {
-      // Use the selected quality or fallback to available quality
       final formats = widget.reel['videoFormats'] as Map<String, dynamic>;
-      return formats[_selectedQuality] ?? formats['720p'] ?? formats['480p'] ?? formats['1080p'];
+      return formats['720p'] ?? formats['480p'] ?? formats['1080p'] ?? '';
     }
     return '';
   }
@@ -92,14 +92,20 @@ class _ReelDetailedPageState extends State<ReelDetailedPage> {
         return const Center(child: Text('Video not available', style: TextStyle(color: Colors.white)));
       }
       
+      _videoPlayer = HLSVideoPlayer(
+        videoUrl: videoUrl,
+        videoId: widget.reel['_id'] ?? '',
+        videoFormats: widget.reel['videoFormats'],
+        autoPlay: true,
+        looping: true,
+        onDispose: () {
+          _videoPlayer = null;
+        },
+      );
+      
       return AspectRatio(
         aspectRatio: 16/9,
-        child: HLSVideoPlayer(
-          videoUrl: videoUrl,
-          videoId: widget.reel['_id'],
-          autoPlay: true,
-          looping: true,
-        ),
+        child: _videoPlayer!,
       );
     } else {
       final images = widget.reel['images'] as List<dynamic>;
@@ -108,10 +114,11 @@ class _ReelDetailedPageState extends State<ReelDetailedPage> {
       }
 
       if (images.length == 1) {
+        final image = images[0] as Map<String, dynamic>;
         return AspectRatio(
           aspectRatio: 16/9,
           child: Image.network(
-            images[0]['large'] ?? images[0]['medium'] ?? images[0]['original'],
+            image['large'] ?? image['medium'] ?? image['original'],
             fit: BoxFit.cover,
             width: double.infinity,
           ),
@@ -131,7 +138,7 @@ class _ReelDetailedPageState extends State<ReelDetailedPage> {
                   });
                 },
                 itemBuilder: (context, index) {
-                  final image = images[index];
+                  final image = images[index] as Map<String, dynamic>;
                   return Image.network(
                     image['large'] ?? image['medium'] ?? image['original'],
                     fit: BoxFit.cover,
@@ -193,7 +200,7 @@ class _ReelDetailedPageState extends State<ReelDetailedPage> {
                       CircleAvatar(
                         backgroundColor: Colors.grey[800],
                         child: Text(
-                          widget.reel['username'][0].toUpperCase(),
+                          widget.reel['createdBy'][0].toUpperCase(),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -205,7 +212,7 @@ class _ReelDetailedPageState extends State<ReelDetailedPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '@${widget.reel['username']}',
+                            '@${widget.reel['createdBy']}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -219,7 +226,6 @@ class _ReelDetailedPageState extends State<ReelDetailedPage> {
                     ],
                   ),
                   const SizedBox(height: 20),
-
                   // Description
                   Text(
                     widget.reel['description'],
@@ -230,39 +236,6 @@ class _ReelDetailedPageState extends State<ReelDetailedPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Additional Information
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[900],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Market Analysis',
-                          style: TextStyle(
-                            color: Colors.amber,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'This analysis provides insights into current market trends and potential trading opportunities. The content demonstrates key technical indicators and support/resistance levels.',
-                          style: TextStyle(
-                            color: Colors.grey[300],
-                            fontSize: 14,
-                            height: 1.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
                   // Engagement Stats
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
