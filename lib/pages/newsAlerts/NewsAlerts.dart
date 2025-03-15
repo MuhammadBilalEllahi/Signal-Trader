@@ -244,7 +244,7 @@ class _ReelItemState extends State<ReelItem> {
           height: double.infinity,
           child: Image.network(
             image['large'] ?? image['medium'] ?? image['original'],
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
           ),
         );
       } else {
@@ -266,7 +266,7 @@ class _ReelItemState extends State<ReelItem> {
                   final image = images[index] as Map<String, dynamic>;
                   return Image.network(
                     image['large'] ?? image['medium'] ?? image['original'],
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                     width: double.infinity,
                     height: double.infinity,
                     loadingBuilder: (context, child, loadingProgress) {
@@ -325,11 +325,11 @@ class _ReelItemState extends State<ReelItem> {
                   Row(
             children: [
               Text(
-                        '@${widget.reel['createdBy']}',
+                        '${widget.reel['title']}',
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: 18,
                 ),
                       ),
                       const SizedBox(width: 8),

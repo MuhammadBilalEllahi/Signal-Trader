@@ -104,7 +104,7 @@ class _ReelDetailedPageState extends State<ReelDetailedPage> {
       );
       
       return AspectRatio(
-        aspectRatio: 16/9,
+        aspectRatio: 6/9,
         child: _videoPlayer!,
       );
     } else {
@@ -116,7 +116,7 @@ class _ReelDetailedPageState extends State<ReelDetailedPage> {
       if (images.length == 1) {
         final image = images[0] as Map<String, dynamic>;
         return AspectRatio(
-          aspectRatio: 16/9,
+          aspectRatio: 6/9,
           child: Image.network(
             image['large'] ?? image['medium'] ?? image['original'],
             fit: BoxFit.cover,
@@ -212,11 +212,11 @@ class _ReelDetailedPageState extends State<ReelDetailedPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '@${widget.reel['createdBy']}',
+                            '${widget.reel['title']}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: 20,
                             ),
                           ),
                           const SizedBox(height: 4),
