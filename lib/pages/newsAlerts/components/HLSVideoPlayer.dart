@@ -13,7 +13,7 @@ class HLSVideoPlayer extends StatefulWidget {
   @override
   final Key? key;
 
-  const HLSVideoPlayer({
+   const HLSVideoPlayer({
     this.key,
     required this.videoUrl,
     required this.videoId,
