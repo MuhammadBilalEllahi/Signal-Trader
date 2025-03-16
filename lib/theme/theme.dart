@@ -24,9 +24,9 @@ class MyTheme {
   static final Color ring = HexColor("#FACC15");
 
   // Light Theme Colors
-  static final Color backgroundLight = HexColor("#FFFFFF");
+  static final Color backgroundLight = HexColor("#f2f2f2");
   static final Color foregroundLight = HexColor("#09090B");
-  static final Color cardLight = HexColor("#FFFFFF");
+  static final Color cardLight = HexColor("#f1f1f1");
   static final Color cardForegroundLight = HexColor("#09090B");
   static final Color popoverLight = HexColor("#FFFFFF");
   static final Color popoverForegroundLight = HexColor("#09090B");
@@ -38,7 +38,7 @@ class MyTheme {
   static final Color mutedForegroundLight = HexColor("#71717A");
   static final Color accentLight = HexColor("#F4F4F5");
   static final Color accentForegroundLight = HexColor("#09090B");
-  static final Color borderLight = HexColor("#E4E4E7");
+  static final Color borderLight = HexColor("#cfcfcf");
   static final Color inputLight = HexColor("#E4E4E7");
   static final Color ringLight = HexColor("#FACC15");
 

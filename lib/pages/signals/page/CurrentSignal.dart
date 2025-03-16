@@ -26,16 +26,12 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
   String selectedType = 'all';
   String selectedCoin = '';
   String selectedDirection = 'all';
-  RangeValues entryPriceRange = const RangeValues(0, 100000);
-  RangeValues exitPriceRange = const RangeValues(0, 100000);
   bool showFilterDialog = false;
 
   // Applied filter state variables
   String appliedType = 'all';
   String appliedCoin = '';
   String appliedDirection = 'all';
-  RangeValues appliedEntryPriceRange = const RangeValues(0, 100000);
-  RangeValues appliedExitPriceRange = const RangeValues(0, 100000);
 
   @override
   void initState() {
@@ -73,16 +69,11 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
       selectedType = 'all';
       selectedCoin = '';
       selectedDirection = 'all';
-      selectedType = 'all';
-      entryPriceRange = const RangeValues(0, 100000);
-      exitPriceRange = const RangeValues(0, 100000);
-      
+
       // Also reset applied filters
       appliedType = 'all';
       appliedCoin = '';
       appliedDirection = 'all';
-      appliedEntryPriceRange = const RangeValues(0, 100000);
-      appliedExitPriceRange = const RangeValues(0, 100000);
     });
   }
 
@@ -91,20 +82,16 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
       appliedType = selectedType;
       appliedCoin = selectedCoin;
       appliedDirection = selectedDirection;
-      appliedEntryPriceRange = entryPriceRange;
-      appliedExitPriceRange = exitPriceRange;
     });
   }
 
   List<Map<String, dynamic>> getFilteredSignals(List<Map<String, dynamic>> signals) {
     return signals.where((signal) {
-      bool typeMatch = appliedType == 'all' || signal['type'] == appliedType;
+      bool typeMatch = appliedType == 'all' || signal['type'].toString().toLowerCase() == appliedType.toLowerCase();
       bool coinMatch = appliedCoin.isEmpty || signal['coin'].toString().toLowerCase().contains(appliedCoin.toLowerCase());
       bool directionMatch = appliedDirection == 'all' || signal['direction'].toString().toLowerCase() == appliedDirection;
-      bool entryPriceMatch = signal['entryPrice'] >= appliedEntryPriceRange.start && signal['entryPrice'] <= appliedEntryPriceRange.end;
-      bool exitPriceMatch = signal['exitPrice'] >= appliedExitPriceRange.start && signal['exitPrice'] <= appliedExitPriceRange.end;
-      
-      return typeMatch && coinMatch && directionMatch && entryPriceMatch && exitPriceMatch;
+     
+      return typeMatch && coinMatch && directionMatch;
     }).toList();
   }
 
@@ -182,103 +169,7 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
                       },
                     ),
                     const Text('Entry Price Range'),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Entry Price Range', style: TextStyle(fontWeight: FontWeight.w500)),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                decoration: const InputDecoration(
-                                  labelText: 'Min Price',
-                                  prefixText: '\$',
-                                  border: OutlineInputBorder(),
-                                ),
-                                keyboardType: TextInputType.number,
-                                onChanged: (value) {
-                                  final minPrice = double.tryParse(value) ?? 0;
-                                  setState(() {
-                                    entryPriceRange = RangeValues(
-                                      minPrice,
-                                      entryPriceRange.end,
-                                    );
-                                  });
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: TextField(
-                                decoration: const InputDecoration(
-                                  labelText: 'Max Price',
-                                  prefixText: '\$',
-                                  border: OutlineInputBorder(),
-                                ),
-                                keyboardType: TextInputType.number,
-                                onChanged: (value) {
-                                  final maxPrice = double.tryParse(value) ?? 100000;
-                                  setState(() {
-                                    entryPriceRange = RangeValues(
-                                      entryPriceRange.start,
-                                      maxPrice,
-                                    );
-                                  });
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        const Text('Exit Price Range', style: TextStyle(fontWeight: FontWeight.w500)),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                decoration: const InputDecoration(
-                                  labelText: 'Min Price',
-                                  prefixText: '\$',
-                                  border: OutlineInputBorder(),
-                                ),
-                                keyboardType: TextInputType.number,
-                                onChanged: (value) {
-                                  final minPrice = double.tryParse(value) ?? 0;
-                                  setState(() {
-                                    exitPriceRange = RangeValues(
-                                      minPrice,
-                                      exitPriceRange.end,
-                                    );
-                                  });
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: TextField(
-                                decoration: const InputDecoration(
-                                  labelText: 'Max Price',
-                                  prefixText: '\$',
-                                  border: OutlineInputBorder(),
-                                ),
-                                keyboardType: TextInputType.number,
-                                onChanged: (value) {
-                                  final maxPrice = double.tryParse(value) ?? 100000;
-                                  setState(() {
-                                    exitPriceRange = RangeValues(
-                                      exitPriceRange.start,
-                                      maxPrice,
-                                    );
-                                  });
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
+                   ],
                 ),
               ),
               actions: [
@@ -321,6 +212,10 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
     if (start < 0) start = 0;
     
     return List.generate(end - start + 1, (index) => start + index);
+  }
+
+  bool get isDark {
+    return Theme.of(context).brightness == Brightness.dark;
   }
 
   @override
@@ -429,7 +324,7 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
                                   child: Text(
                                     '${index + 1}',
                                     style: TextStyle(
-                                      color: currentIndex == index ?   Colors.black: Colors.white,
+                                      color: currentIndex == index ? isDark  ? Colors.black : Colors.white : Theme.of(context).colorScheme.onSurface,
                                     ),
                                   ),
                               ))

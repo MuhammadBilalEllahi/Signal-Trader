@@ -307,6 +307,10 @@ class _ReelItemState extends State<ReelItem> {
     }
   }
 
+  bool get isDark {
+    return Theme.of(context).brightness == Brightness.dark;
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -326,8 +330,8 @@ class _ReelItemState extends State<ReelItem> {
             children: [
               Text(
                         '${widget.reel['title']}',
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: isDark || widget.reel['type']=='video' ? Colors.white : Colors.black,
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
                 ),
@@ -341,8 +345,8 @@ class _ReelItemState extends State<ReelItem> {
                     builder: (context, constraints) {
                       final textSpan = TextSpan(
                         text: widget.reel['description'],
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: isDark || widget.reel['type']=='video' ? Colors.white : Colors.black,
                           fontSize: 14,
                         ),
                       );
@@ -364,8 +368,8 @@ class _ReelItemState extends State<ReelItem> {
                               onTap: _navigateToDetailedPage,
                               child: Text(
                               widget.reel['description'],
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: isDark || widget.reel['type']=='video' ? Colors.white : Colors.black,
                                 fontSize: 14,
                               ),
                                 maxLines: 3,
@@ -381,14 +385,14 @@ class _ReelItemState extends State<ReelItem> {
               Text(
                                     'Read more',
                                     style: TextStyle(
-                                      color: Colors.amber[400],
+                                      color: isDark ? Colors.amber[400] : Colors.black,
                                       fontSize: 12,
                                     ),
                                   ),
                                   Icon(
                                     Icons.arrow_forward_ios,
                                     size: 12,
-                                    color: Colors.amber[400],
+                                    color: isDark ? Colors.amber[400] : Colors.black  ,
                                   ),
                                 ],
                               ),
@@ -406,13 +410,13 @@ class _ReelItemState extends State<ReelItem> {
           child: Column(
             children: [
               IconButton(
-                icon: const Icon(Icons.favorite_border, color: Colors.white),
+                icon: Icon(Icons.favorite_border, color: isDark ? Colors.white : Colors.black),
                 onPressed: () {},
               ),
               Text(
                 '${widget.reel['likes']}',
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black,
                       fontSize: 14,
                     ),
               ),
@@ -422,14 +426,14 @@ class _ReelItemState extends State<ReelItem> {
                       widget.reel['isSaved'] ?? false 
                         ? Icons.bookmark 
                         : Icons.bookmark_border,
-                      color: Colors.white
+                      color: isDark ? Colors.white : Colors.black,
                     ),
                 onPressed: () {},
               ),
               Text(
                 '${widget.reel['comments']}',
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black,
                       fontSize: 14,
                     ),
               ),
