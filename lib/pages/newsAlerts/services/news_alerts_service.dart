@@ -33,4 +33,22 @@ class NewsAlertsService {
       return [];
     }
   }
+
+  // Future<void> saveNewsAlert(String newsAlertId) async {
+  //   try {
+  //     final response = await _apiClient.post('news-alerts/save/$newsAlertId');
+  //   } catch (e) {
+  //     print('Error saving news alert: $e');
+  //   }
+  // }
+
+  // Future<void> unsaveNewsAlert(String newsAlertId) async {
+  //   try {
+  //     final response = await _apiClient.post('news-alerts/unsave/$newsAlertId');
+  //   } catch (e) {
+  //     print('Error unsaving news alert: $e');
+  //   }
+  // }
+
+  
 } 

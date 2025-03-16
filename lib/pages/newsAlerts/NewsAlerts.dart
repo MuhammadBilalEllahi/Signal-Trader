@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:tradingapp/pages/newsAlerts/providers/news_alerts_provider.dart';
 import 'package:tradingapp/pages/newsAlerts/components/HLSVideoPlayer.dart';
 import 'package:tradingapp/pages/newsAlerts/services/news_alerts_service.dart';
+import '../../../services/media_cache_service.dart';
 
 class NewsAlerts extends StatefulWidget {
   const NewsAlerts({super.key});
@@ -17,6 +18,7 @@ class NewsAlerts extends StatefulWidget {
 class _NewsAlertsState extends State<NewsAlerts> {
   late PageController _pageController;
   final NewsAlertsService _newsAlertsService = NewsAlertsService();
+  final MediaCacheService _mediaCacheService = MediaCacheService();
   List<Map<String, dynamic>> reels = [];
   bool _isLoading = true;
   int _currentPage = 1;
@@ -41,6 +43,10 @@ class _NewsAlertsState extends State<NewsAlerts> {
         _isLoading = false;
         _hasMore = newsAlerts.length >= _pageSize;
       });
+
+      // Preload initial videos
+      await _mediaCacheService.preloadVideos(newsAlerts);
+      await _mediaCacheService.preloadImages(newsAlerts);
     }
   }
 
@@ -60,12 +66,18 @@ class _NewsAlertsState extends State<NewsAlerts> {
         _isLoading = false;
         _hasMore = moreNewsAlerts.length >= _pageSize;
       });
+
+      // Preload next set of media
+      final currentIndex = Provider.of<NewsAlertsProvider>(context, listen: false).currentReelIndex;
+      await _mediaCacheService.preloadUpcomingVideos(reels, currentIndex);
+      await _mediaCacheService.preloadImages(moreNewsAlerts);
     }
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _mediaCacheService.clearCache();
     super.dispose();
   }
 
@@ -90,27 +102,29 @@ class _NewsAlertsState extends State<NewsAlerts> {
               }
               return true;
             },
-        child: PageView.builder(
-        controller: _pageController,
-        scrollDirection: Axis.vertical,
+            child: PageView.builder(
+              controller: _pageController,
+              scrollDirection: Axis.vertical,
               itemCount: reels.length + (_hasMore ? 1 : 0),
-          onPageChanged: (index) {
-            Provider.of<NewsAlertsProvider>(context, listen: false)
-                .setCurrentReelIndex(index);
+              onPageChanged: (index) {
+                Provider.of<NewsAlertsProvider>(context, listen: false)
+                    .setCurrentReelIndex(index);
+                
+                // Preload upcoming videos when page changes
+                _mediaCacheService.preloadUpcomingVideos(reels, index);
                 
                 if (index == reels.length - 2) {
                   _loadMoreReels();
                 }
-          },
-        itemBuilder: (context, index) {
+              },
+              itemBuilder: (context, index) {
                 if (index == reels.length) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                debugPrint("reels[index]ii---- ${reels[index]}");
-          return ReelItem(reel: reels[index]);
-        },
-        ),
-        ),
+                return ReelItem(reel: reels[index]);
+              },
+            ),
+          ),
         ),
       ),
     );
@@ -307,6 +321,12 @@ class _ReelItemState extends State<ReelItem> {
     }
   }
 
+  // Future<void> toggleSaveNewsAlert() async {
+  //   widget.reel['isSaved'] ?? false 
+  //     ? await _newsAlertsService.unsaveNewsAlert(widget.reel['_id'])
+  //     : await _newsAlertsService.saveNewsAlert(widget.reel['_id']);
+  // }
+
   bool get isDark {
     return Theme.of(context).brightness == Brightness.dark;
   }
@@ -428,7 +448,9 @@ class _ReelItemState extends State<ReelItem> {
                         : Icons.bookmark_border,
                       color: isDark ? Colors.white : Colors.black,
                     ),
-                onPressed: () {},
+                onPressed: () {
+                  // toggleSaveNewsAlert();
+                },
               ),
               Text(
                 '${widget.reel['comments']}',

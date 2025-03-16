@@ -128,66 +128,134 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return AlertDialog(
-              
-              title: const Text('Filter Signals'),
-              content: SingleChildScrollView(
+            return Dialog(
+              backgroundColor: const Color(0xFF1C1C1C),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(24),
                 child: Column(
-                  mainAxisSize: MainAxisSize.max,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    DropdownButton<String>(
-                      value: selectedType,
-                      isExpanded: true,
-                      items: const [
-                        DropdownMenuItem(value: 'all', child: Text('All Types')),
-                        DropdownMenuItem(value: 'gold', child: Text('Gold')),
-                        DropdownMenuItem(value: 'stocks', child: Text('Stocks')),
-                        DropdownMenuItem(value: 'crypto', child: Text('Crypto')),
-                      ],
-                      onChanged: (value) {
-                        setState(() => selectedType = value!);
-                      },
+                    const Text(
+                      'Filter Signals',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
+                    const SizedBox(height: 24),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2C2C2C),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFF3C3C3C)),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: selectedType,
+                          isExpanded: true,
+                          dropdownColor: const Color(0xFF2C2C2C),
+                          style: const TextStyle(color: Colors.white),
+                          items: const [
+                            DropdownMenuItem(value: 'all', child: Text('All Types')),
+                            DropdownMenuItem(value: 'gold', child: Text('Gold')),
+                            DropdownMenuItem(value: 'stocks', child: Text('Stocks')),
+                            DropdownMenuItem(value: 'crypto', child: Text('Crypto')),
+                          ],
+                          onChanged: (value) {
+                            setState(() => selectedType = value!);
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     TextField(
-                      decoration: const InputDecoration(
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
                         labelText: 'Search by Coin',
+                        labelStyle: const TextStyle(color: Colors.grey),
+                        filled: true,
+                        fillColor: const Color(0xFF2C2C2C),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Color(0xFF3C3C3C)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Color(0xFF3C3C3C)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Color(0xFFFFD700)),
+                        ),
                       ),
                       onChanged: (value) {
                         setState(() => selectedCoin = value);
                       },
                     ),
-                    DropdownButton<String>(
-                      value: selectedDirection,
-                      isExpanded: true,
-                      items: const [
-                        DropdownMenuItem(value: 'all', child: Text('All Directions')),
-                        DropdownMenuItem(value: 'long', child: Text('Long')),
-                        DropdownMenuItem(value: 'short', child: Text('Short')),
-                      ],
-                      onChanged: (value) {
-                        setState(() => selectedDirection = value!);
-                      },
+                    const SizedBox(height: 16),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2C2C2C),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFF3C3C3C)),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: selectedDirection,
+                          isExpanded: true,
+                          dropdownColor: const Color(0xFF2C2C2C),
+                          style: const TextStyle(color: Colors.white),
+                          items: const [
+                            DropdownMenuItem(value: 'all', child: Text('All Directions')),
+                            DropdownMenuItem(value: 'long', child: Text('Long')),
+                            DropdownMenuItem(value: 'short', child: Text('Short')),
+                          ],
+                          onChanged: (value) {
+                            setState(() => selectedDirection = value!);
+                          },
+                        ),
+                      ),
                     ),
-                    const Text('Entry Price Range'),
-                   ],
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            _resetFilters();
+                            Navigator.pop(context);
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.grey,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          ),
+                          child: const Text('Reset'),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            _applyFilters();
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFFD700),
+                            foregroundColor: Colors.black,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          ),
+                          child: const Text('Apply'),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    _resetFilters();
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Reset'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    _applyFilters();
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Apply'),
-                ),
-              ],
             );
           },
         );

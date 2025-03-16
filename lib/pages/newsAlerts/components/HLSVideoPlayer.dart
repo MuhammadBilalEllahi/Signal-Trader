@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
+import '../../../services/media_cache_service.dart';
 
 class HLSVideoPlayer extends StatefulWidget {
   final String videoUrl;
@@ -31,6 +32,7 @@ class HLSVideoPlayer extends StatefulWidget {
 }
 
 class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
+  final MediaCacheService _cacheService = MediaCacheService();
   VideoPlayerController? _controller;
   bool _isPlaying = false;
   bool _isBuffering = false;
@@ -42,7 +44,7 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
   bool _isDragging = false;
-  static final Map<String, Duration> _videoPositions = {};
+  Timer? _positionUpdateTimer;
   bool _isQualityMenuOpen = false;
 
   @override
@@ -50,6 +52,12 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
     super.initState();
     _initializePlayer();
     _setupQualityOptions();
+    // Start position update timer
+    _positionUpdateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_controller != null && _isInitialized && !_isDragging) {
+        _updatePosition();
+      }
+    });
   }
 
   void _setupQualityOptions() {
@@ -145,11 +153,44 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
     _startHideControlsTimer();
   }
 
+  void _updatePosition() {
+    if (_controller != null) {
+      final position = _controller!.value.position;
+      _cacheService.updateVideoPosition(widget.videoId, position);
+    }
+  }
+
   Future<void> _initializePlayer() async {
     try {
       await _controller?.dispose();
 
-      // Start with auto (720p) or fallback to available quality
+      // Check if video is in cache
+      final cachedController = _cacheService.getCachedVideoController(widget.videoId);
+      if (cachedController != null) {
+        _controller = cachedController;
+        if (mounted) {
+          setState(() {
+            _isInitialized = true;
+            _isPlaying = widget.autoPlay;
+            _duration = _controller!.value.duration;
+            _position = _controller!.value.position;
+          });
+
+          // Restore saved position
+          final savedPosition = _cacheService.getVideoPosition(widget.videoId);
+          if (savedPosition != null) {
+            await _controller!.seekTo(savedPosition);
+          }
+
+          if (widget.autoPlay) {
+            await _controller!.play();
+          }
+          await _controller!.setLooping(widget.looping);
+          return;
+        }
+      }
+
+      // If not in cache, initialize new controller
       final initialUrl = _qualityOptions['auto'] ??
           _qualityOptions['720p'] ??
           _qualityOptions['480p'] ??
@@ -183,8 +224,8 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
           _duration = _controller!.value.duration;
         });
 
-        // Restore previous position if exists
-        final savedPosition = _videoPositions[widget.videoId];
+        // Restore saved position
+        final savedPosition = _cacheService.getVideoPosition(widget.videoId);
         if (savedPosition != null) {
           await _controller!.seekTo(savedPosition);
           _position = savedPosition;
@@ -228,9 +269,9 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
         _duration = duration;
       });
       
-      // Save position periodically
+      // Save position periodically and mark as visited when played
       if (!_isDragging) {
-        _videoPositions[widget.videoId] = position;
+        _cacheService.markVideoAsVisited(widget.videoId);
       }
     }
   }
@@ -489,12 +530,16 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
 
   @override
   void dispose() {
+    // Save final position before disposing
     if (_controller != null) {
-      _videoPositions[widget.videoId] = _controller!.value.position;
+      _updatePosition();
     }
+    _positionUpdateTimer?.cancel();
     _hideControlsTimer?.cancel();
     _controller?.removeListener(_videoListener);
-    _controller?.dispose();
+    if (_cacheService.getCachedVideoController(widget.videoId) != _controller) {
+      _controller?.dispose();
+    }
     widget.onDispose?.call();
     super.dispose();
   }
