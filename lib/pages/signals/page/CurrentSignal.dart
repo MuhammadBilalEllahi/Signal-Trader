@@ -286,6 +286,11 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
     return Theme.of(context).brightness == Brightness.dark;
   }
 
+  Future<void> _refreshSignals() async {
+    final provider = Provider.of<SignalsProvider>(context, listen: false);
+    await provider.fetchSignals(refresh: true);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<SignalsProvider>(
@@ -294,7 +299,7 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
         final currentIndex = signalsProvider.currentIndex;
         
         return RefreshIndicator(
-          onRefresh: () => signalsProvider.fetchSignals(refresh: true),
+          onRefresh: _refreshSignals,
           child: Column(
             children: [
               Padding(
@@ -329,6 +334,7 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
                           return false;
                         },
                         child: ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
                           itemCount: filteredSignals.length + (signalsProvider.hasMore ? 1 : 0),
                           itemBuilder: (context, index) {
                             if (index == filteredSignals.length) {

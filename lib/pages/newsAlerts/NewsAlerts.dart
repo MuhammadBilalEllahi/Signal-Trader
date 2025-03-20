@@ -23,7 +23,7 @@ class _NewsAlertsState extends State<NewsAlerts> {
   bool _isLoading = true;
   int _currentPage = 1;
   bool _hasMore = true;
-  static const int _pageSize = 2;
+  static const int _pageSize = 10;
 
   @override
   void initState() {
@@ -191,25 +191,13 @@ class _ReelItemState extends State<ReelItem> {
         textColor = Colors.black87;
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [startColor, endColor],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        text,
+    return Text(
+        "#$text",
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: textColor,
-          letterSpacing: 1.2,
+          color: startColor,
         ),
-      ),
     );
   }
 
@@ -346,7 +334,9 @@ class _ReelItemState extends State<ReelItem> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(
                         '${widget.reel['title']}',

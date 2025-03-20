@@ -68,47 +68,59 @@ print("Response Fav $response");
     }
   }
 
+  Future<void> _refreshFavourites() async {
+    setState(() {
+      currentPage = 1;
+      hasMore = true;
+    });
+    await _fetchFavouriteSignals();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: favSignals.isEmpty && isLoading
-              ?  Column(
-                          children: [
-                            ShimmerSignalCard(120),
-                            ShimmerSignalCard(120),
-                            ShimmerSignalCard(120),
-                          ],
-                        )
-              : NotificationListener<ScrollNotification>(
-                  onNotification: (scrollNotification) {
-                    if (scrollNotification.metrics.pixels ==
-                            scrollNotification.metrics.maxScrollExtent &&
-                        !isLoading) {
-                      _fetchFavouriteSignals(isLoadMore: true);
-                    }
-                    return false;
-                  },
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    itemCount: favSignals.length + (hasMore ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index == favSignals.length) {
-                        return Column(
-                          children: [
-                            ShimmerSignalCard(200),
-                            ShimmerSignalCard(200),
-                            ShimmerSignalCard(200),
-                          ],
-                        );
+    return RefreshIndicator(
+      onRefresh: _refreshFavourites,
+      child: Column(
+        children: [
+          Expanded(
+            child: favSignals.isEmpty && isLoading
+                ? Column(
+                    children: [
+                      ShimmerSignalCard(120),
+                      ShimmerSignalCard(120),
+                      ShimmerSignalCard(120),
+                    ],
+                  )
+                : NotificationListener<ScrollNotification>(
+                    onNotification: (scrollNotification) {
+                      if (scrollNotification.metrics.pixels ==
+                              scrollNotification.metrics.maxScrollExtent &&
+                          !isLoading) {
+                        _fetchFavouriteSignals(isLoadMore: true);
                       }
-                      return SignalCard(favSignals[index]);
+                      return false;
                     },
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      controller: _scrollController,
+                      itemCount: favSignals.length + (hasMore ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == favSignals.length) {
+                          return Column(
+                            children: [
+                              ShimmerSignalCard(200),
+                              ShimmerSignalCard(200),
+                              ShimmerSignalCard(200),
+                            ],
+                          );
+                        }
+                        return SignalCard(favSignals[index]);
+                      },
+                    ),
                   ),
-                ),
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,10 +1,10 @@
 class ApiConstants {
-  // static String baseUrl = 'http://192.168.1.7:4000/';
-  static String baseUrl = 'https://trading-server-production.up.railway.app/';
+  static String baseUrl = 'http://192.168.1.10:8080/';
+  // static String baseUrl = 'https://trading-server-production.up.railway.app/';
 
-  // static String baseUrl = 'http://0.0.0.0:4000/';
-  // static String baseUrl = 'http://localhost:4000/';
-  // static String baseUrl = 'http://10.0.2.2:4000/';
+  // static String baseUrl = 'http://0.0.0.0:8080/';
+  // static String baseUrl = 'http://localhost:8080/';
+  // static String baseUrl = 'http://10.0.2.2:8080/';
 
   static String signals = 'signals';
   static String adminCreateSignal = 'signals/admin/create';
