@@ -116,7 +116,7 @@ class _ReelDetailedPageState extends State<ReelDetailedPage> {
       if (images.length == 1) {
         final image = images[0] as Map<String, dynamic>;
         return AspectRatio(
-          aspectRatio: 6/9,
+          aspectRatio: 9/6,
           child: Image.network(
             image['large'] ?? image['medium'] ?? image['original'],
             fit: BoxFit.cover,
@@ -125,7 +125,7 @@ class _ReelDetailedPageState extends State<ReelDetailedPage> {
         );
       } else {
         return AspectRatio(
-          aspectRatio: 16/9,
+          aspectRatio: 9/6,
           child: Stack(
             children: [
               PageView.builder(

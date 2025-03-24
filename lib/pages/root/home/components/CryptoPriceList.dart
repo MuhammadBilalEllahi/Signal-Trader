@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tradingapp/providers/crypto_price_provider.dart';
+import 'package:tradingapp/pages/root/trading/TradingInterface.dart';
 
 class CryptoPriceList extends StatelessWidget {
   const CryptoPriceList({super.key});
@@ -70,7 +71,14 @@ class CryptoPriceList extends StatelessWidget {
 
                   return InkWell(
                     onTap: () {
-                      // Handle tap - could navigate to detailed view
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TradingInterface(
+                            symbol: price.symbol,
+                          ),
+                        ),
+                      );
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
