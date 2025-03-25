@@ -2,13 +2,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:tradingapp/pages/services/constants/constants.dart';
+import 'package:tradingapp/shared/client/ApiClient.dart';
+import 'package:tradingapp/shared/constants/constants.dart';
+  import 'package:tradingapp/pages/services/TOTPService.dart';
 
 class AuthService extends ChangeNotifier {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://localhost:8080', // Replace with your API URL
-  ));
-  String? _verificationId;  // Add this field for phone verification
+  final _apiClient = ApiClient();
+  String? _verificationId;
+  bool _is2FARequired = false;
+
+  bool get is2FARequired => _is2FARequired;
 
   // Email Sign Up
   Future<UserCredential> signUpWithEmail(String email, String password) async {
@@ -22,9 +28,10 @@ class AuthService extends ChangeNotifier {
       await userCredential.user?.sendEmailVerification();
 
       // Register with backend
-      await _dio.post('/auth/email/register', data: {
+      await _apiClient.post('/auth/email/register', {
         'email': email,
         'password': password,
+        'firebaseUid': userCredential.user!.uid,
       });
 
       return userCredential;
@@ -41,7 +48,7 @@ class AuthService extends ChangeNotifier {
         phoneNumber: phoneNumber,
         verificationCompleted: (PhoneAuthCredential credential) async {
           await _firebaseAuth.signInWithCredential(credential);
-          await _dio.post('/auth/phone/register', data: {
+          await _apiClient.post('/auth/phone/register', {
             'phoneNumber': phoneNumber,
           });
         },
@@ -81,7 +88,7 @@ class AuthService extends ChangeNotifier {
   Future<void> resetPassword(String email) async {
     try {
       await _firebaseAuth.sendPasswordResetEmail(email: email);
-      await _dio.post('/auth/password/reset', data: {
+      await _apiClient.post('/auth/password/reset', {
         'email': email,
       });
     } catch (e) {
@@ -90,42 +97,89 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  Future<Map<String, dynamic>> generateSecret() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) throw Exception('No user logged in');
+    final response = await _apiClient.get('/auth/2fa/enable/get-secret');
+    return response ;
+  }
+
   // Enable 2FA
   Future<Map<String, dynamic>> enable2FA() async {
     try {
       final user = _firebaseAuth.currentUser;
       if (user == null) throw Exception('No user logged in');
 
-      final response = await _dio.post('/auth/2fa/enable', data: {
-        'userId': user.uid,
-      });
-
-      return response.data;
+      // Generate a random secret using TOTPService
+      final generatedSecret = await generateSecret();
+      final secret = generatedSecret['secret'] ?? '';
+      final otpauthUrl = generatedSecret['otpauth_url'] ?? '';
+    debugPrint('secret $secret, otpauthUrl $otpauthUrl'); 
+      return {
+        'alreadyEnabled': generatedSecret['alreadyEnabled'] ?? false,
+        'secret': secret,
+        'otpauth_url': otpauthUrl,
+      };
     } catch (e) {
-      debugPrint("2FA Enable Error: $e");
-      rethrow;
+      throw Exception('Failed to enable 2FA: $e');
     }
   }
 
   // Verify 2FA
-  Future<bool> verify2FA(String token) async {
+  Future<bool> verify2FAInitialize(String code) async {
     try {
       final user = _firebaseAuth.currentUser;
       if (user == null) throw Exception('No user logged in');
 
-      final response = await _dio.post('/auth/2fa/verify', data: {
-        'userId': user.uid,
-        'token': token,
+      // Verify the code with backend
+      final response = await _apiClient.post('/auth/2fa/verify-initialize', {
+        'code': code,
+        'firebaseUid': user.uid,
       });
 
-      return response.data['verified'] ?? false;
+      debugPrint('response from verify2FAInitialize $response');
+
+      return response['success'] ?? false;
     } catch (e) {
-      debugPrint("2FA Verification Error: $e");
-      rethrow;
+      throw Exception('Failed to verify 2FA: $e');
     }
   }
 
-  // Google Sign In (existing code)
+  // Verify 2FA during login
+  Future<bool> verify2FALogin(String code) async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) throw Exception('No user logged in');
+
+      // Verify the code with backend
+      final response = await _apiClient.post('/auth/2fa/verify-login', {
+        'code': code,
+        'firebaseUid': user.uid,
+      });
+
+      return response['success'] ?? false;
+    } catch (e) {
+      throw Exception('Failed to verify 2FA: $e');
+    }
+  }
+
+  // Check if 2FA is enabled for a user
+  Future<bool> is2FAEnabled() async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) return false;
+
+      final response = await _apiClient.get('/auth/2fa/status', queryParameters: {
+        'firebaseUid': user.uid,
+      });
+
+      return response['enabled'] ?? false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Google Sign In
   Future<UserCredential?> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
@@ -137,7 +191,18 @@ class AuthService extends ChangeNotifier {
         idToken: googleAuth.idToken,
       );
 
-      return await _firebaseAuth.signInWithCredential(credential);
+      final userCredential = await _firebaseAuth.signInWithCredential(credential);
+
+      // Register/update user in backend
+      await _apiClient.post('/auth/google/register', {
+        'email': userCredential.user!.email,
+        'firebaseUid': userCredential.user!.uid,
+      });
+
+      // Check if 2FA is enabled
+      _is2FARequired = await is2FAEnabled();
+
+      return userCredential;
     } catch (e) {
       debugPrint("Google Auth Error: $e");
       rethrow;
@@ -152,14 +217,18 @@ class AuthService extends ChangeNotifier {
         password: password,
       );
 
+      // Check if 2FA is enabled
+      _is2FARequired = await is2FAEnabled();
+
       // Get JWT token from backend
-      final response = await _dio.post('/auth/email/login', data: {
+      final response = await _apiClient.post('/auth/email/login', {
         'email': email,
         'password': password,
+        'firebaseUid': userCredential.user!.uid,
       });
 
       // Store the token if needed
-      final token = response.data['access_token'];
+      final token = response['access_token'];
       // You might want to store this token in secure storage
 
       return userCredential;
@@ -256,5 +325,11 @@ class AuthService extends ChangeNotifier {
       }
     }
     return error.toString();
+  }
+
+  // Reset 2FA requirement
+  void reset2FARequirement() {
+    _is2FARequired = false;
+    notifyListeners();
   }
 }

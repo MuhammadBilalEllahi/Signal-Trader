@@ -159,7 +159,7 @@ class _SignInState extends State<SignIn> {
             // Email Input
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+      children: [
                 Padding(
                   padding: const EdgeInsets.only(left: 2, bottom: 8),
                   child: Text(
@@ -169,11 +169,11 @@ class _SignInState extends State<SignIn> {
                     ),
                   ),
                 ),
-                TextField(
-                  controller: _emailController,
+        TextField(
+            controller: _emailController,
                   enabled: !_isLoading,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
+            decoration: InputDecoration(
                     hintText: "name@example.com",
                     prefixIcon: const Icon(
                       Icons.email_outlined,
@@ -197,11 +197,11 @@ class _SignInState extends State<SignIn> {
                     ),
                   ),
                 ),
-                TextField(
-                  controller: _passwordController,
+        TextField(
+        controller: _passwordController,
                   enabled: !_isLoading,
-                  obscureText: !_showPassword,
-                  decoration: InputDecoration(
+        obscureText: !_showPassword,
+        decoration: InputDecoration(
                     hintText: "Enter your password",
                     prefixIcon: const Icon(
                       Icons.lock_outline,
@@ -289,13 +289,13 @@ class _SignInState extends State<SignIn> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            'assets/images/google-logo.png',
-                            height: 18,
-                          ),
-                          const SizedBox(width: 12),
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/google-logo.png',
+                      height: 18,
+                    ),
+                    const SizedBox(width: 12),
                           const Text("Continue with Google"),
                         ],
                       ),

@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:tradingapp/firebase_options.dart';
-import 'package:tradingapp/pages/UI/GetStarted.dart';
 import 'package:tradingapp/pages/auth/AuthGate.dart';
-import 'package:tradingapp/pages/auth/SignIn.dart';
 import 'package:tradingapp/pages/services/AuthService.dart';
 import 'package:tradingapp/pages/services/ThemeService.dart';
 import 'package:tradingapp/pages/services/UserService.dart';
@@ -15,7 +13,6 @@ import 'package:tradingapp/pages/newsAlerts/providers/news_alerts_provider.dart'
 import 'package:tradingapp/pages/signals/providers/signals_provider.dart';
 import 'package:tradingapp/pages/root/profile/providers/profile_provider.dart';
 import 'package:tradingapp/providers/crypto_price_provider.dart';
-// import 'package:tradingapp/pages/services/firebase_options.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
