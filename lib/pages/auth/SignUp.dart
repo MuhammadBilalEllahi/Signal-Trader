@@ -14,20 +14,79 @@ class SignUp extends StatefulWidget {
 class _SignUpState extends State<SignUp> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  late bool _showPassword = false;
+  bool _showPassword = false;
+  bool _isLoading = false;
 
-  void _signUp() {
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  String _getReadableErrorMessage(String errorCode) {
+    switch (errorCode) {
+      case 'email-already-in-use':
+        return 'This email is already registered. Please sign in or use a different email.';
+      case 'invalid-email':
+        return 'Please enter a valid email address.';
+      case 'operation-not-allowed':
+        return 'Email/password accounts are not enabled. Please contact support.';
+      case 'weak-password':
+        return 'Please enter a stronger password. Use at least 6 characters with letters and numbers.';
+      default:
+        return 'An error occurred. Please try again later.';
+    }
+  }
+
+  Future<void> _signUp() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Please enter both email and password"),
+          content: const Text("Please enter both email and password"),
           backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
         ),
       );
       return;
     }
-    Provider.of<AuthService>(context, listen: false)
-        .signUp(_emailController.text, _passwordController.text);
+
+    setState(() => _isLoading = true);
+    try {
+      await context.read<AuthService>().signUpWithEmail(
+        _emailController.text,
+        _passwordController.text,
+      );
+    } catch (e) {
+      String errorMessage = e.toString();
+      
+      // Extract error code from Firebase error message
+      final RegExp regExp = RegExp(r'\[(.*?)\]');
+      final match = regExp.firstMatch(errorMessage);
+      if (match != null && match.groupCount >= 1) {
+        final errorCode = match.group(1)?.split('/')[1] ?? '';
+        errorMessage = _getReadableErrorMessage(errorCode);
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          action: SnackBarAction(
+            label: 'OK',
+            textColor: Colors.white,
+            onPressed: () {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            },
+          ),
+        ),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -67,12 +126,16 @@ class _SignUpState extends State<SignUp> {
                 ),
                 TextField(
                   controller: _emailController,
+                  enabled: !_isLoading,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     hintText: "name@example.com",
-                    prefixIcon: Icon(
+                    prefixIcon: const Icon(
                       Icons.email_outlined,
                       size: 20,
+                    ),
+                    errorStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
                     ),
                   ),
                 ),
@@ -94,10 +157,11 @@ class _SignUpState extends State<SignUp> {
                 ),
                 TextField(
                   controller: _passwordController,
+                  enabled: !_isLoading,
                   obscureText: !_showPassword,
                   decoration: InputDecoration(
                     hintText: "Create a password",
-                    prefixIcon: Icon(
+                    prefixIcon: const Icon(
                       Icons.lock_outline,
                       size: 20,
                     ),
@@ -110,6 +174,9 @@ class _SignUpState extends State<SignUp> {
                       ),
                       onPressed: () => setState(() => _showPassword = !_showPassword),
                     ),
+                    errorStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                   ),
                 ),
               ],
@@ -118,8 +185,14 @@ class _SignUpState extends State<SignUp> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _signUp,
-                child: Text("Create account"),
+                onPressed: _isLoading ? null : _signUp,
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text("Create account"),
               ),
             ),
             const SizedBox(height: 24),
@@ -131,8 +204,8 @@ class _SignUpState extends State<SignUp> {
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 TextButton(
-                  onPressed: widget.changeSignUp,
-                  child: Text("Sign in"),
+                  onPressed: _isLoading ? null : widget.changeSignUp,
+                  child: const Text("Sign in"),
                 ),
               ],
             ),

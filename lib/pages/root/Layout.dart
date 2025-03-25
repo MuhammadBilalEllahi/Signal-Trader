@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tradingapp/admin/pages/AdminDashboard.dart';
+import 'package:tradingapp/pages/auth/TwoFactorSetupScreen.dart';
 import 'package:tradingapp/pages/messages/ChatListScreen.dart';
 import 'package:tradingapp/pages/newsAlerts/NewsAlerts.dart';
 import 'package:tradingapp/pages/root/profile/Profile.dart';
@@ -131,6 +132,7 @@ class _LayoutState extends State<Layout> {
                 SubscriptionPage(),
                 // ChatListScreen(),
                 ProfileImage(),
+                // TwoFactorSetupScreen(),
               ],
             ),
           if (!hasError && !isLoading)

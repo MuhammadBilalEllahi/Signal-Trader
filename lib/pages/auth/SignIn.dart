@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/AuthService.dart';
+import 'PhoneAuthScreen.dart';
+import 'package:tradingapp/pages/auth/PasswordResetScreen.dart';
 
 class SignIn extends StatefulWidget {
   final Function() changeSignIn;
@@ -14,24 +16,122 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  late bool _showPassword = false;
+  bool _showPassword = false;
+  bool _isLoading = false;
 
-  void _signIn() {
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  String _getReadableErrorMessage(String errorCode) {
+    switch (errorCode) {
+      case 'invalid-email':
+        return 'Please enter a valid email address.';
+      case 'user-disabled':
+        return 'This account has been disabled. Please contact support.';
+      case 'user-not-found':
+        return 'No account found with this email. Please sign up first.';
+      case 'wrong-password':
+        return 'Incorrect password. Please try again.';
+      case 'too-many-requests':
+        return 'Too many failed attempts. Please try again later.';
+      case 'network-request-failed':
+        return 'Network error. Please check your internet connection.';
+      default:
+        return 'An error occurred. Please try again later.';
+    }
+  }
+
+  Future<void> _signIn() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Please enter both email and password"),
+          content: const Text("Please enter both email and password"),
           backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
         ),
       );
       return;
     }
-    Provider.of<AuthService>(context, listen: false)
-        .signIn(_emailController.text, _passwordController.text);
+
+    setState(() => _isLoading = true);
+    try {
+      await context.read<AuthService>().signIn(
+        _emailController.text,
+        _passwordController.text,
+      );
+    } catch (e) {
+      String errorMessage = e.toString();
+      
+      // Extract error code from Firebase error message
+      final RegExp regExp = RegExp(r'\[(.*?)\]');
+      final match = regExp.firstMatch(errorMessage);
+      if (match != null && match.groupCount >= 1) {
+        final errorCode = match.group(1)?.split('/')[1] ?? '';
+        errorMessage = _getReadableErrorMessage(errorCode);
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          action: SnackBarAction(
+            label: 'OK',
+            textColor: Colors.white,
+            onPressed: () {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            },
+          ),
+        ),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
-  void _signInGoogle() {
-    Provider.of<AuthService>(context, listen: false).signInGoogle();
+  Future<void> _signInGoogle() async {
+    setState(() => _isLoading = true);
+    try {
+      final result = await context.read<AuthService>().signInWithGoogle();
+      if (result == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sign in cancelled'),
+            behavior: SnackBarBehavior.floating,
+            margin: EdgeInsets.all(16),
+          ),
+        );
+      }
+    } catch (e) {
+      String errorMessage = e.toString();
+      if (errorMessage.contains('network-request-failed')) {
+        errorMessage = 'Network error. Please check your internet connection.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          action: SnackBarAction(
+            label: 'OK',
+            textColor: Colors.white,
+            onPressed: () {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            },
+          ),
+        ),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -59,7 +159,7 @@ class _SignInState extends State<SignIn> {
             // Email Input
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+              children: [
                 Padding(
                   padding: const EdgeInsets.only(left: 2, bottom: 8),
                   child: Text(
@@ -69,12 +169,13 @@ class _SignInState extends State<SignIn> {
                     ),
                   ),
                 ),
-        TextField(
-            controller: _emailController,
+                TextField(
+                  controller: _emailController,
+                  enabled: !_isLoading,
                   keyboardType: TextInputType.emailAddress,
-            decoration: InputDecoration(
+                  decoration: InputDecoration(
                     hintText: "name@example.com",
-                    prefixIcon: Icon(
+                    prefixIcon: const Icon(
                       Icons.email_outlined,
                       size: 20,
                     ),
@@ -96,12 +197,13 @@ class _SignInState extends State<SignIn> {
                     ),
                   ),
                 ),
-        TextField(
-        controller: _passwordController,
-        obscureText: !_showPassword,
-        decoration: InputDecoration(
+                TextField(
+                  controller: _passwordController,
+                  enabled: !_isLoading,
+                  obscureText: !_showPassword,
+                  decoration: InputDecoration(
                     hintText: "Enter your password",
-                    prefixIcon: Icon(
+                    prefixIcon: const Icon(
                       Icons.lock_outline,
                       size: 20,
                     ),
@@ -119,11 +221,38 @@ class _SignInState extends State<SignIn> {
               ],
             ),
             const SizedBox(height: 24),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: _isLoading ? null : () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PasswordResetScreen(),
+                    ),
+                  );
+                },
+                child: Text(
+                  'Forgot Password?',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _signIn,
-                child: Text("Sign in"),
+                onPressed: _isLoading ? null : _signIn,
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text("Sign in"),
               ),
             ),
             const SizedBox(height: 24),
@@ -152,16 +281,44 @@ class _SignInState extends State<SignIn> {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                onPressed: _signInGoogle,
-                child: Row(
+                onPressed: _isLoading ? null : _signInGoogle,
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/google-logo.png',
+                            height: 18,
+                          ),
+                          const SizedBox(width: 12),
+                          const Text("Continue with Google"),
+                        ],
+                      ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: _isLoading ? null : () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PhoneAuthScreen(),
+                    ),
+                  );
+                },
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset(
-                      'assets/images/google-logo.png',
-                      height: 18,
-                    ),
-                    const SizedBox(width: 12),
-                    Text("Continue with Google"),
+                    Icon(Icons.phone),
+                    SizedBox(width: 12),
+                    Text("Continue with Phone"),
                   ],
                 ),
               ),
@@ -175,8 +332,8 @@ class _SignInState extends State<SignIn> {
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 TextButton(
-                  onPressed: widget.changeSignIn,
-                  child: Text("Sign up"),
+                  onPressed: _isLoading ? null : widget.changeSignIn,
+                  child: const Text("Sign up"),
                 ),
               ],
             ),

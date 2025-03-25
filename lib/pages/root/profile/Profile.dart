@@ -4,6 +4,7 @@ import 'package:tradingapp/pages/services/UserService.dart';
 import 'package:tradingapp/pages/services/constants/constants.dart';
 import 'package:tradingapp/pages/root/profile/providers/profile_provider.dart';
 import 'package:tradingapp/pages/signals/subscription/SubscriptionPlans.dart';
+import 'package:tradingapp/pages/root/profile/components/BiometricSetupScreen.dart';
 import '../../services/AuthService.dart';
 
 class Profile extends StatefulWidget {
@@ -90,6 +91,40 @@ class _ProfileState extends State<Profile> {
                   ),
                   subtitle: Text(
                     "Upgrade your trading experience",
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                ),
+                ListTile(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const BiometricSetupScreen(),
+                      ),
+                    );
+                  },
+                  leading: Icon(
+                    Icons.fingerprint,
+                    size: 36,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: Text(
+                    "Biometric Lock",
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  subtitle: Text(
+                    "Set up fingerprint or face ID lock",
                     style: TextStyle(
                       fontSize: 13,
                       color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
