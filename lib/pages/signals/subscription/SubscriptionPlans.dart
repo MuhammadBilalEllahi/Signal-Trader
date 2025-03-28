@@ -74,16 +74,15 @@ class SubscriptionPlans extends StatelessWidget {
                     ],
                     isPopular: true,
                     onSubscribe: () {
-                      // Handle pro plan subscription
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PaymentPage(selectedPlan: 0),
+                          builder: (context) => const PaymentPage(selectedPlan: 0),
                         ),
                       );
                     },
                   ),
-                 ],
+                ],
               ),
             ),
           ],

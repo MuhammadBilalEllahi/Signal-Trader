@@ -1,251 +1,177 @@
 import 'package:flutter/material.dart';
-import 'package:tradingapp/pages/root/profile/components/CreditCardPage.dart';
+import 'package:tradingapp/pages/payment/services/StripeService.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'package:tradingapp/shared/client/ApiClient.dart';
 
 class PaymentPage extends StatefulWidget {
   final int selectedPlan;
-  const PaymentPage({super.key, this.selectedPlan = 0});
+
+  const PaymentPage({super.key, required this.selectedPlan});
 
   @override
   State<PaymentPage> createState() => _PaymentPageState();
 }
 
 class _PaymentPageState extends State<PaymentPage> {
-  late int _selectedPlan;
-  final bool _isProcessing = false;
+  final _stripeService = StripeService();
+  bool _isLoading = false;
+  String? _error;
+  String? _priceId;
+  Map<String, dynamic>? _planDetails;
 
   @override
   void initState() {
     super.initState();
-    _selectedPlan = widget.selectedPlan;
+    _initializeStripe();
+    _fetchPlanDetails();
   }
 
-  final List<Map<String, dynamic>> _plans = [
-    {
-      'name': 'Monthly',
-      'price': '\$49.99',
-      'period': 'month',
-      'features': [
-        'All trading signals',
-        'Real-time alerts',
-        'Market analysis',
-        'Priority support',
-      ],
-    },
-    {
-      'name': 'Quarterly',
-      'price': '\$129.99',
-      'period': '3 months',
-      'features': [
-        'All trading signals',
-        'Real-time alerts',
-        'Market analysis',
-        'Priority support',
-        'Save 13%',
-      ],
-    },
-    {
-      'name': 'Yearly',
-      'price': '\$449.99',
-      'period': 'year',
-      'features': [
-        'All trading signals',
-        'Real-time alerts',
-        'Market analysis',
-        'Priority support',
-        'Save 25%',
-        'Exclusive webinars',
-      ],
-    },
-  ];
-
-  Widget _buildPlanCard(int index) {
-    final plan = _plans[index];
-    final isSelected = _selectedPlan == index;
-
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 200),
-      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-            : Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).dividerColor,
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: InkWell(
-        onTap: () => setState(() => _selectedPlan = index),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    plan['name'],
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).textTheme.titleLarge?.color,
-                    ),
-                  ),
-                  Radio(
-                    value: index,
-                    groupValue: _selectedPlan,
-                    onChanged: (value) => setState(() => _selectedPlan = value!),
-                    activeColor: Theme.of(context).colorScheme.primary,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    plan['price'],
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).textTheme.titleLarge?.color,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '/${plan['period']}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              const Divider(),
-              const SizedBox(height: 16),
-              ...plan['features'].map<Widget>((feature) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.check_circle,
-                          color: Theme.of(context).colorScheme.primary,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          feature,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  )),
-            ],
-          ),
-        ),
-      ),
-    );
+  Future<void> _initializeStripe() async {
+    await _stripeService.initialize();
   }
 
-  Widget _buildPaymentSection() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -4),
-          ),
-        ],
+  Future<void> _fetchPlanDetails() async {
+    try {
+      final response = await ApiClient().get('/stripe/subscriptions');
+
+      if (response.statusCode == 200) {
+        final subscriptions = json.decode(response.body);
+        // Find the subscription that matches the selected plan
+        final subscription = subscriptions.firstWhere(
+          (sub) => sub['items'][0]['product']['name'] == 
+            (widget.selectedPlan == 0 ? "Pro Trader Subscription" : "Basic Subscription"),
+          orElse: () => null,
+        );
+
+        if (subscription != null) {
+          setState(() {
+            _priceId = subscription['items'][0]['price']['id'];
+            _planDetails = {
+              'name': subscription['items'][0]['product']['name'],
+              'price': subscription['items'][0]['price']['unit_amount'] / 100, // Convert from cents to dollars
+              'currency': subscription['items'][0]['price']['currency'],
+              'description': subscription['items'][0]['product']['description'],
+              'features': subscription['items'][0]['product']['metadata']?['features']?.split(',') ?? [],
+            };
+          });
+        } else {
+          setState(() {
+            _error = 'Subscription plan not found';
+          });
+        }
+      } else {
+        setState(() {
+          _error = 'Failed to fetch subscription details';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+      });
+    }
+  }
+
+  Future<void> _handlePayment() async {
+    if (_priceId == null) {
+      setState(() {
+        _error = 'Subscription details not loaded';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final result = await _stripeService.createSubscription(_priceId!);
+      
+      if (result['success']) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Payment successful!')),
+          );
+          Navigator.pop(context);
+        }
+      } else {
+        setState(() {
+          _error = result['error'];
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Payment'),
       ),
-      child: SafeArea(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                Expanded(
+            if (_planDetails != null)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Total Amount',
-                        style: TextStyle(
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.color
-                              ?.withOpacity(0.7),
-                        ),
+                        'Selected Plan: ${_planDetails!['name']}',
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       Text(
-                        _plans[_selectedPlan]['price'],
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        'Price: ${_planDetails!['currency']}${_planDetails!['price']}',
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
+                      if (_planDetails!['description'] != null) ...[
+                        const SizedBox(height: 8),
+                        Text(_planDetails!['description']),
+                      ],
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Features included:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      ..._buildFeatures(),
                     ],
                   ),
                 ),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _isProcessing
-                        ? null
-                        : () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CreditCardPage(
-                                  amount: _plans[_selectedPlan]['price'],
-                                  planName: _plans[_selectedPlan]['name'],
-                                ),
-                              ),
-                            );
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.155),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(
-                          color: Theme.of(context).colorScheme.primary,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    child: const Text(
-                      'Proceed to Payment',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+              )
+            else
+              const Center(child: CircularProgressIndicator()),
+            const SizedBox(height: 24),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Text(
+                  _error!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
-              ],
+              ),
+            ElevatedButton(
+              onPressed: _isLoading || _priceId == null ? null : _handlePayment,
+              child: _isLoading
+                  ? const CircularProgressIndicator()
+                  : const Text('Pay Now'),
             ),
           ],
         ),
@@ -253,52 +179,22 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Choose Plan'),
-        centerTitle: true,
-        elevation: 0,
-      ),
-      body: Stack(
-        children: [
-          ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-            children: [
-              Text(
-                'Select your plan',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Choose the plan that best suits your needs',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.color
-                          ?.withOpacity(0.7),
-                    ),
-              ),
-              const SizedBox(height: 24),
-              ...List.generate(
-                _plans.length,
-                (index) => _buildPlanCard(index),
-              ),
-            ],
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: _buildPaymentSection(),
-          ),
-        ],
-      ),
-    );
+  List<Widget> _buildFeatures() {
+    if (_planDetails == null || _planDetails!['features'] == null) {
+      return [];
+    }
+
+    return (_planDetails!['features'] as List<String>).map((feature) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Row(
+          children: [
+            const Icon(Icons.check_circle, size: 20),
+            const SizedBox(width: 8),
+            Text(feature),
+          ],
+        ),
+      );
+    }).toList();
   }
 }
