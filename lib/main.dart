@@ -13,7 +13,7 @@ import 'package:tradingapp/pages/newsAlerts/providers/news_alerts_provider.dart'
 import 'package:tradingapp/pages/signals/providers/signals_provider.dart';
 import 'package:tradingapp/pages/root/profile/providers/profile_provider.dart';
 import 'package:tradingapp/pages/root/home/providers/crypto_price_provider.dart';
-
+import 'package:shorebird_code_push/shorebird_code_push.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,8 +36,42 @@ void main() async{
       child:const MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+
+    final updater = ShorebirdUpdater();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Get the current patch number and print it to the console.
+    // It will be `null` if no patches are installed.
+    updater.readCurrentPatch().then((currentPatch) {
+      print('The current patch number is: ${currentPatch?.number}');
+    });
+  }
+
+  Future<void> _checkForUpdates() async {
+    // Check whether a new update is available.
+    final status = await updater.checkForUpdate();
+
+    if (status == UpdateStatus.outdated) {
+      try {
+        // Perform the update
+        await updater.update();
+      } on UpdateException catch (error) {
+        // Handle any errors that occur while updating.
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {

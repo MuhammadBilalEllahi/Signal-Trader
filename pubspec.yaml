@@ -61,6 +61,7 @@ dependencies:
   flutter_dotenv: ^5.2.1
   flutter_cache_manager: ^3.4.1
   local_auth: ^2.1.8
+  shorebird_code_push: ^2.0.3
   # speakeasy: ^1.1.0
   crypto: ^3.0.3
   convert: ^3.1.1
