@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:tradingapp/pages/newsAlerts/providers/news_alerts_provider.dart';
 import 'package:tradingapp/pages/newsAlerts/components/HLSVideoPlayer.dart';
 import 'package:tradingapp/pages/newsAlerts/services/news_alerts_service.dart';
-import '../../../services/media_cache_service.dart';
+import 'services/media_cache_service.dart';
 
 class NewsAlerts extends StatefulWidget {
   const NewsAlerts({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:tradingapp/pages/services/constants/constants.dart';
+import 'package:tradingapp/shared/constants/app_constants.dart';
 
 class GetStartedScreen extends StatelessWidget {
   final PageController pageController;

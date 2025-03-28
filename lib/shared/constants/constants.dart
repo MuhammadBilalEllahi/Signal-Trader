@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 class ApiConstants {
   // static String baseUrl = 'https://trading-server-production.up.railway.app/';
-  static String baseUrl = 'http://192.168.1.10:8080/';
+  static String baseUrl = 'http://192.168.1.9:8080/';
   // _getBaseUrl();
 
   static String _getBaseUrl() {

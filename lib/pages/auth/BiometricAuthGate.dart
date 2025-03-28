@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tradingapp/pages/services/BiometricService.dart';
+import 'package:tradingapp/pages/auth/services/BiometricService.dart';
 import 'package:tradingapp/theme/theme.dart';
 
 class BiometricAuthGate extends StatefulWidget {

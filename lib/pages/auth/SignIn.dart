@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/AuthService.dart';
+import 'services/AuthService.dart';
 import 'PhoneAuthScreen.dart';
 import 'package:tradingapp/pages/auth/PasswordResetScreen.dart';
 

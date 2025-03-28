@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:tradingapp/pages/auth/OnBoardingScreen.dart';
 import 'package:tradingapp/pages/auth/SignOrSignUp.dart';
 import 'package:tradingapp/pages/root/Layout.dart';
-import 'package:tradingapp/pages/services/UserService.dart';
+import 'package:tradingapp/pages/auth/services/UserService.dart';
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});

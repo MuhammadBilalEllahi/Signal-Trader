@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:tradingapp/providers/crypto_price_provider.dart';
+import 'package:tradingapp/pages/root/home/providers/crypto_price_provider.dart';
 import 'package:tradingapp/theme/theme.dart';
 import 'package:tradingapp/pages/root/trading/components/MarketData.dart';
 import 'package:tradingapp/pages/root/trading/components/PriceChart.dart';

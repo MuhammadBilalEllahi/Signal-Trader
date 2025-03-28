@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:tradingapp/pages/services/constants/constants.dart';
+import 'package:tradingapp/shared/constants/app_constants.dart';
 import 'package:tradingapp/shared/client/ApiClient.dart';
 import 'package:tradingapp/shared/constants/constants.dart';
-  import 'package:tradingapp/pages/services/TOTPService.dart';
+  import 'package:tradingapp/pages/auth/services/TOTPService.dart';
 
 class AuthService extends ChangeNotifier {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;

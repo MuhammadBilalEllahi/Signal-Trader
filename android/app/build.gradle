@@ -73,4 +73,5 @@ dependencies {
     implementation "androidx.biometric:biometric:1.2.0-alpha05"
     implementation 'com.google.android.gms:play-services-base:18.3.0'
     implementation 'com.google.android.gms:play-services-measurement-api:22.2.0'
+    implementation 'com.stripe:stripe-android:20.35.2'
 }

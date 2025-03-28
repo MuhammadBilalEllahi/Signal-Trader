@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
-import '../../../services/media_cache_service.dart';
+import '../services/media_cache_service.dart';
 
 class HLSVideoPlayer extends StatefulWidget {
   final String videoUrl;

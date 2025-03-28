@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tradingapp/pages/auth/SignIn.dart';
 import 'package:tradingapp/pages/auth/SignUp.dart';
 import 'package:tradingapp/pages/auth/PhoneAuthScreen.dart';
-import 'package:tradingapp/pages/services/AuthService.dart';
+import 'package:tradingapp/pages/auth/services/AuthService.dart';
 import 'package:tradingapp/theme/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:tradingapp/pages/auth/PasswordResetScreen.dart';

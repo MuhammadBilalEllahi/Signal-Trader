@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/AuthService.dart';
+import 'services/AuthService.dart';
 
 class SignUp extends StatefulWidget {
   final Function() changeSignUp;

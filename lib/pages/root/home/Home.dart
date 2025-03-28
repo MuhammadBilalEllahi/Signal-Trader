@@ -3,8 +3,8 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
 import 'package:tradingapp/pages/root/home/components/CryptoPriceList.dart';
 import 'package:tradingapp/pages/root/home/components/HomeButtons.dart';
-import 'package:tradingapp/pages/services/constants/constants.dart';
-import 'package:tradingapp/providers/crypto_price_provider.dart';
+import 'package:tradingapp/shared/constants/app_constants.dart';
+import 'package:tradingapp/pages/root/home/providers/crypto_price_provider.dart';
 import 'package:tradingapp/theme/theme.dart';
 
 class Home extends StatefulWidget {

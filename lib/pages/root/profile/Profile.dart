@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tradingapp/pages/services/UserService.dart';
-import 'package:tradingapp/pages/services/constants/constants.dart';
+import 'package:tradingapp/pages/auth/services/UserService.dart';
+import 'package:tradingapp/shared/constants/app_constants.dart';
 import 'package:tradingapp/pages/root/profile/providers/profile_provider.dart';
 import 'package:tradingapp/pages/signals/subscription/SubscriptionPlans.dart';
 import 'package:tradingapp/pages/root/profile/components/BiometricSetupScreen.dart';
-import '../../services/AuthService.dart';
+import '../../auth/services/AuthService.dart';
 import 'package:tradingapp/pages/auth/TwoFactorSetupScreen.dart';
 class Profile extends StatefulWidget {
   const Profile({super.key});
