@@ -14,6 +14,7 @@ import 'package:tradingapp/pages/signals/providers/signals_provider.dart';
 import 'package:tradingapp/pages/root/profile/providers/profile_provider.dart';
 import 'package:tradingapp/pages/root/home/providers/crypto_price_provider.dart';
 
+
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: "./.env");
