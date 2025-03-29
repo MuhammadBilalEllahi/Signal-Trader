@@ -17,6 +17,7 @@ class SignalCard extends StatefulWidget {
 class _SignalCardState extends State<SignalCard> {
   bool isFavorite = false;
   bool showFullAnalysis = false;
+  bool isPremiumSignal = false;
 
 
   @override
@@ -24,6 +25,7 @@ class _SignalCardState extends State<SignalCard> {
     super.initState();
     isFavorite = widget.signal['isFavorite'] ?? false;
     debugPrint('wiget.signal ${widget.signal}');
+    isPremiumSignal = widget.signal['subscriptionValue'] != 'spot-free' ? true : false;
   }
 
   Future<void> toggleFavorite() async {
@@ -101,8 +103,9 @@ class _SignalCardState extends State<SignalCard> {
           return Theme.of(context).colorScheme.onPrimary;
       }
     }
-debugPrint("${widget.signal['type']} ${widget.signal['coin']} ${widget.signal['direction']}",);
+// debugPrint("${widget.signal['type']} ${widget.signal['coin']} ${widget.signal['direction']}",);
     return Container(
+      
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
       margin: const EdgeInsets.only(left: 8),
       decoration: BoxDecoration(
@@ -137,6 +140,7 @@ debugPrint("${widget.signal['type']} ${widget.signal['coin']} ${widget.signal['d
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     Widget cardContent = Column(
+      
       // mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -269,14 +273,15 @@ debugPrint("${widget.signal['type']} ${widget.signal['coin']} ${widget.signal['d
       child: Card(
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         elevation: 0,
+        
         color: isDark 
             ? Theme.of(context).colorScheme.surface
             : Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
           side: BorderSide(
-            color: Theme.of(context).dividerTheme.color ?? Colors.transparent,
-            width: 1,
+            color: isPremiumSignal ?  Colors.yellow.shade600 : Theme.of(context).dividerTheme.color ?? Colors.transparent,
+            width: isPremiumSignal ? 0.2 :  1,
           ),
         ),
         child: Padding(

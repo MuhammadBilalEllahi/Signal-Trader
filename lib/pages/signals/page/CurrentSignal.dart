@@ -111,8 +111,9 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
     });
 
     socket.on('new-signal', (data) {
-      debugPrint("SIGNAL DATA $data");
+      debugPrint("SIGNAL DATA---- $data");
       if (data != null && data is Map<String, dynamic>) {
+        debugPrint("SIGNAL DATA---000- $data");
         Provider.of<SignalsProvider>(context, listen: false).addNewSignal(data);
       } else {
         debugPrint("Invalid signal data received: $data");
