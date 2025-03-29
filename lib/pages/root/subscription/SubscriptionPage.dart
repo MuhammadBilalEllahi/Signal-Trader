@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tradingapp/pages/root/profile/components/PaymentPage.dart';
+import 'package:tradingapp/pages/root/profile/components/SubscriptionInfo.dart';
 import 'package:tradingapp/pages/root/profile/components/PaymentSuccessPage.dart';
 import 'package:tradingapp/services/subscription_service.dart';
 
@@ -17,9 +17,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   String? _error;
 
   
+
+  
   @override
   void initState() {
     super.initState();
+    
     _loadPlans();
   }
 
@@ -54,8 +57,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PaymentPage(
-            selectedPlan: _plans.indexOf(plan),
+          builder: (context) => SubscriptionInfo(
+            planDetails: plan,
           ),
         ),
       );

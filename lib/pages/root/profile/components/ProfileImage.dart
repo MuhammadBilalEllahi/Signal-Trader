@@ -3,7 +3,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:tradingapp/pages/auth/services/UserService.dart';
-import 'package:tradingapp/pages/root/profile/components/PaymentPage.dart';
+import 'package:tradingapp/pages/root/profile/components/SubscriptionInfo.dart';
 import 'package:tradingapp/pages/root/subscription/SubscriptionPage.dart';
 class ProfileImage extends StatefulWidget {
   const ProfileImage({super.key});

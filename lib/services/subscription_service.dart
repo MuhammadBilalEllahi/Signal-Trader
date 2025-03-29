@@ -32,14 +32,4 @@ class SubscriptionService {
       throw Exception('Failed to fetch subscription status: $e');
     }
   }
-
-
-  routeForUserToPayAPlan(String priceId) async {
-    try {
-      final response = await _apiService.get('/user-subscribes/user/pay-plan/$priceId');
-      return response;
-    } catch (e) {
-      throw Exception('Failed to pay a plan: $e');
-    }
-  } 
-  }
+} 
