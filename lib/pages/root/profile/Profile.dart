@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tradingapp/pages/auth/services/UserService.dart';
 import 'package:tradingapp/pages/newsAlerts/providers/news_alerts_provider.dart';
 import 'package:tradingapp/pages/root/home/providers/crypto_price_provider.dart';
+import 'package:tradingapp/pages/root/subscription/SubscriptionPage.dart';
 import 'package:tradingapp/pages/signals/providers/signals_provider.dart';
 import 'package:tradingapp/providers/subscription_provider.dart';
 import 'package:tradingapp/shared/constants/app_constants.dart';
@@ -88,7 +89,7 @@ class _ProfileState extends State<Profile> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const SubscriptionPlans(),
+                        builder: (context) => const SubscriptionPage(),
                       ),
                     );
                   },

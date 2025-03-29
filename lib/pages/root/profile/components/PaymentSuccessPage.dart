@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:math' as math;
+
+import 'package:tradingapp/providers/subscription_provider.dart';
 
 class PaymentSuccessPage extends StatefulWidget {
   final Map<String, dynamic> transactionDetails;
@@ -55,6 +58,10 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
     );
 
     _controller.forward();
+
+
+    Provider.of<SubscriptionProvider>(context, listen: false).checkSubscriptionStatus(forceRefresh: true);
+    
   }
 
   @override
