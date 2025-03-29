@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tradingapp/pages/payment/services/StripeService.dart';
+import 'package:tradingapp/pages/root/profile/components/PaymentSuccessPage.dart';
 
 class SubscriptionInfo extends StatefulWidget {
   final Map<String, dynamic> planDetails;
@@ -16,6 +17,7 @@ class _SubscriptionInfoState extends State<SubscriptionInfo> {
   String? _error;
   String? _priceId;
   String? _productId;
+
   @override
   void initState() {
     super.initState();
@@ -26,7 +28,15 @@ class _SubscriptionInfoState extends State<SubscriptionInfo> {
   }
 
   Future<void> _initializeStripe() async {
-    await _stripeService.initialize();
+    try {
+      await _stripeService.initialize();
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Failed to initialize payment system: $e';
+        });
+      }
+    }
   }
 
   Future<void> _handlePayment() async {
@@ -47,14 +57,20 @@ class _SubscriptionInfoState extends State<SubscriptionInfo> {
 
       if (result['success']) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Payment successful!')),
+          // Navigate to success page
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PaymentSuccessPage(
+                planName: widget.planDetails['product']['name'],
+                amount: '\$${(widget.planDetails['unit_amount'] / 100).toStringAsFixed(2)}',
+              ),
+            ),
           );
-          Navigator.pop(context);
         }
       } else {
         setState(() {
-          _error = result['error'];
+          _error = result['error'] ?? 'Payment failed';
         });
       }
     } catch (e) {
@@ -124,9 +140,16 @@ class _SubscriptionInfoState extends State<SubscriptionInfo> {
                 ),
               ),
             ElevatedButton(
-              onPressed: _isLoading || widget.planDetails['id'] == null ? null : _handlePayment,
+              onPressed: _isLoading ? null : _handlePayment,
               child: _isLoading
-                  ? const CircularProgressIndicator()
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
                   : const Text('Pay Now'),
             ),
           ],
@@ -136,7 +159,6 @@ class _SubscriptionInfoState extends State<SubscriptionInfo> {
   }
 
   List<Widget> _buildFeatures() {
-    debugPrint("FEATURES: ${widget.planDetails['product']?['metadata']?['marketingFeatures']}");
     final marketingFeatures = widget.planDetails['product']?['metadata']?['marketingFeatures']?.toString();
     
     if (marketingFeatures == null || marketingFeatures.isEmpty) {
@@ -144,10 +166,8 @@ class _SubscriptionInfoState extends State<SubscriptionInfo> {
     }
 
     final listOfMarketingFeatures = marketingFeatures.split(',');
-    debugPrint("LIST OF MARKETING FEATURES: $listOfMarketingFeatures");
     
     return listOfMarketingFeatures.map((feature) {
-      debugPrint("FEATURE--: $feature");
       return Padding(
         padding: const EdgeInsets.only(bottom: 4),
         child: Row(
@@ -158,6 +178,6 @@ class _SubscriptionInfoState extends State<SubscriptionInfo> {
           ],
         ),
       );
-    }).toList(); // Convert the Iterable to List<Widget>
+    }).toList();
   }
 }

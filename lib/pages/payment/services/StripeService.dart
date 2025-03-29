@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:tradingapp/shared/client/ApiClient.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/material.dart';
 
 class StripeService {
   static final StripeService _instance = StripeService._internal();
@@ -21,8 +22,40 @@ class StripeService {
     await Stripe.instance.applySettings();
   }
 
-  Future<dynamic> createSubscription(String priceId, String productId) async {
-    final response = await _apiClient.post('user-subscribes/user/pay-plan/$priceId/$productId', {});
-    return response;
+  Future<Map<String, dynamic>> createSubscription(String priceId, String productId) async {
+    try {
+      // First create subscription in backend
+      final response = await _apiClient.post('user-subscribes/user/pay-plan/$priceId/$productId', {});
+      
+      if (response['proceedTOPaymentPage']) {
+        // Get the client secret from the subscription
+        final subscriptionResponse = await _apiClient.post('stripe/create-subscription', {
+          'priceId': priceId,
+          'productId': productId,
+        });
+
+        // Initialize payment sheet
+        await Stripe.instance.initPaymentSheet(
+          paymentSheetParameters: SetupPaymentSheetParameters(
+            paymentIntentClientSecret: subscriptionResponse['clientSecret'],
+            merchantDisplayName: 'Trading App',
+            style: ThemeMode.system,
+          ),
+        );
+
+        // Present payment sheet
+        await Stripe.instance.presentPaymentSheet();
+
+        return {'success': true};
+      }
+      
+      return {'success': false, 'error': 'Failed to initialize payment'};
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  Future<void> handlePaymentSuccess() async {
+    // Handle any post-payment success logic
   }
 }

@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
 import 'package:tradingapp/firebase_options.dart';
 import 'package:tradingapp/pages/auth/AuthGate.dart';
@@ -18,6 +19,7 @@ import 'package:shorebird_code_push/shorebird_code_push.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: "./.env");
+    Stripe.publishableKey= 'pk_test_9xyXDdkFfnAvQAN4BsJQO2Kz00jDvuahp8';// dotenv.env['random_pub_key'] ?? '';
   await Firebase.initializeApp(
     // name: AppConstants.appName,
     options: DefaultFirebaseOptions.currentPlatform);
