@@ -16,7 +16,7 @@ class SignalsPage extends StatefulWidget {
 class _SignalsPageState extends State<SignalsPage> {
   int _selectedTab = 0;
   bool _isSpotSelected = true;
-  final bool _hasFuturesAccess = false; // This should come from your user's subscription status
+  // final bool _hasFuturesAccess = false; // This should come from your user's subscription status
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class _SignalsPageState extends State<SignalsPage> {
               ),
             ),
             TradingTypeSwitch(
-              hasFuturesAccess: _hasFuturesAccess,
+              // hasFuturesAccess: _hasFuturesAccess,
               isSpotSelected: _isSpotSelected,
               onSpotSelected: (isSpot) {
                 setState(() => _isSpotSelected = isSpot);

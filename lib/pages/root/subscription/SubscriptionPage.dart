@@ -15,14 +15,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   List<dynamic> _plans = [];
   bool _isLoading = true;
   String? _error;
+  String? _subscribedPlanId;
+  String? _subscribedProductId;
+  bool _isAlreadySubscribed = false;
 
-  
-
-  
   @override
   void initState() {
     super.initState();
-    
     _loadPlans();
   }
 
@@ -33,9 +32,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         _error = null;
       });
       
-      final plans = await _subscriptionService.getStripePlans();
+      final response = await _subscriptionService.getStripePlans();
       setState(() {
-        _plans = plans;
+        _plans = response['plans'] ?? [];
+        _subscribedPlanId = response['subscribedPlanId'];
+        _subscribedProductId = response['subscribedProductId'];
+        _isAlreadySubscribed = response['message'] == 'alreadySubscribed';
         _isLoading = false;
       });
     } catch (e) {
@@ -52,8 +54,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   Future<void> _handleSubscribe(Map<String, dynamic> plan) async {
+    if (_subscriptionService.isPlanSubscribed(plan, _subscribedPlanId)) {
+      return;
+    }
+
     try {
-      // Navigate to payment page with plan details
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -64,7 +69,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       );
 
       if (result == true) {
-        // Payment successful
         if (mounted) {
           Navigator.push(
             context,
@@ -87,13 +91,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   List<String> _getFeatures(Map<String, dynamic> plan) {
-    // Try to get features from the product first
     final productFeatures = plan['product']['marketing_features'] as List<dynamic>?;
     if (productFeatures != null && productFeatures.isNotEmpty) {
       return productFeatures.map((f) => f.toString()).toList();
     }
-
-   return [];
+    return [];
   }
 
   @override
@@ -129,7 +131,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                         itemBuilder: (context, index) {
                           final plan = _plans[index];
                           final product = plan['product'];
-                          final isPopular = index == 1; // Mark second plan as popular
+                          final isPopular = index == 1;
+                          final isSubscribed = _subscriptionService.isPlanSubscribed(plan, _subscribedPlanId);
 
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 16),
@@ -144,6 +147,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                       : 'one-time',
                               features: _getFeatures(plan),
                               isPopular: isPopular,
+                              isSubscribed: isSubscribed,
                               onSubscribe: () => _handleSubscribe(plan),
                             ),
                           );
@@ -160,6 +164,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     String? period,
     required List<String> features,
     required bool isPopular,
+    required bool isSubscribed,
     required VoidCallback onSubscribe,
   }) {
     return Container(
@@ -252,27 +257,45 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   ),
                 )),
                 const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: onSubscribe,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: isPopular
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.surface,
-                      foregroundColor: isPopular
-                          ? Theme.of(context).colorScheme.onPrimary
-                          : Theme.of(context).colorScheme.primary,
-                      side: isPopular
-                          ? null
-                          : BorderSide(
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
+                if (isSubscribed)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text('Subscribe Now'),
+                    child: Text(
+                      'Already Subscribed',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  )
+                else
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: onSubscribe,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: isPopular
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.surface,
+                        foregroundColor: isPopular
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.primary,
+                        side: isPopular
+                            ? null
+                            : BorderSide(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                      ),
+                      child: const Text('Subscribe Now'),
+                    ),
                   ),
-                ),
               ],
             ),
           ),

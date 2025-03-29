@@ -15,11 +15,11 @@ import 'package:tradingapp/pages/signals/providers/signals_provider.dart';
 import 'package:tradingapp/pages/root/profile/providers/profile_provider.dart';
 import 'package:tradingapp/pages/root/home/providers/crypto_price_provider.dart';
 import 'package:shorebird_code_push/shorebird_code_push.dart';
+import 'package:tradingapp/providers/subscription_provider.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: "./.env");
-    Stripe.publishableKey= 'pk_test_9xyXDdkFfnAvQAN4BsJQO2Kz00jDvuahp8';// dotenv.env['random_pub_key'] ?? '';
   await Firebase.initializeApp(
     // name: AppConstants.appName,
     options: DefaultFirebaseOptions.currentPlatform);
@@ -33,6 +33,7 @@ void main() async{
         ChangeNotifierProvider(create: (_) => SignalsProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => CryptoPriceProvider()),
+        ChangeNotifierProvider(create: (_) => SubscriptionProvider()),
       ]
       ,
       child:const MyApp()));
@@ -57,7 +58,19 @@ class _MyAppState extends State<MyApp> {
     // It will be `null` if no patches are installed.
     updater.readCurrentPatch().then((currentPatch) {
       print('The current patch number is: ${currentPatch?.number}');
+      if(currentPatch?.number != null){
+        _checkForUpdates();
+      }
     });
+    
+
+    // Check subscription status when app starts
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<SubscriptionProvider>(context, listen: false).checkSubscriptionStatus();
+    });
+
+    
+
   }
 
   Future<void> _checkForUpdates() async {

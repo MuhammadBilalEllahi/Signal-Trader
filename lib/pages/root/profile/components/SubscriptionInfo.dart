@@ -1,6 +1,8 @@
-import 'package:flutter/material.dart';
+  import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:tradingapp/pages/payment/services/StripeService.dart';
 import 'package:tradingapp/pages/root/profile/components/PaymentSuccessPage.dart';
+import 'package:tradingapp/providers/subscription_provider.dart';
 
 class SubscriptionInfo extends StatefulWidget {
   final Map<String, dynamic> planDetails;
@@ -57,6 +59,7 @@ class _SubscriptionInfoState extends State<SubscriptionInfo> {
 
       if (result['success']) {
         if (mounted) {
+          Provider.of<SubscriptionProvider>(context, listen: false).checkSubscriptionStatus();
           // Navigate to success page
           Navigator.pushReplacement(
             context,

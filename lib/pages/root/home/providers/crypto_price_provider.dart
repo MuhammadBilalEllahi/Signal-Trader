@@ -161,6 +161,18 @@ class CryptoPriceProvider extends ChangeNotifier {
     return _symbols;
   }
 
+  void clearCryptoPrice() {
+    // Reset all crypto price data to initial state
+    _isDisposed = false;
+    _prices.clear();
+    _closeConnection();
+    _pingTimer?.cancel();
+    _updateTimer?.cancel();
+    _reconnectTimer?.cancel();
+    _instance = null;
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     _isDisposed = true;

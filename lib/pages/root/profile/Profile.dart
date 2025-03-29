@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tradingapp/pages/auth/services/UserService.dart';
+import 'package:tradingapp/pages/newsAlerts/providers/news_alerts_provider.dart';
+import 'package:tradingapp/pages/root/home/providers/crypto_price_provider.dart';
+import 'package:tradingapp/pages/signals/providers/signals_provider.dart';
+import 'package:tradingapp/providers/subscription_provider.dart';
 import 'package:tradingapp/shared/constants/app_constants.dart';
 import 'package:tradingapp/pages/root/profile/providers/profile_provider.dart';
 import 'package:tradingapp/pages/signals/subscription/SubscriptionPlans.dart';
@@ -27,10 +31,21 @@ class _ProfileState extends State<Profile> {
   }
 
   _signOut() {
+    // Clear all provider data
     Provider.of<AuthService>(context, listen: false).signOut();
     Provider.of<UserService>(context, listen: false).clearUser();
+    Provider.of<SubscriptionProvider>(context, listen: false).clearSubscription();
+    Provider.of<ProfileProvider>(context, listen: false).clearProfile();
+    Provider.of<CryptoPriceProvider>(context, listen: false).clearCryptoPrice();
+    Provider.of<SignalsProvider>(context, listen: false).clearSignals();
+    Provider.of<NewsAlertsProvider>(context, listen: false).clearNewsAlerts();
+
+    // Navigate to auth gate and clear all routes
     Navigator.pushNamedAndRemoveUntil(
-        context, AppRoutes.authGate, (route) => false);
+      context, 
+      AppRoutes.authGate, 
+      (route) => false
+    );
   }
 
   @override

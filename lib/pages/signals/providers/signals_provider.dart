@@ -8,6 +8,7 @@ class SignalsProvider extends ChangeNotifier {
   int _currentPage = 1;
   bool _isInitialized = false;
   int _currentIndex = 0;
+  String? _error;
 
   List<Map<String, dynamic>> get signals => _signals;
   bool get isLoading => _isLoading;
@@ -68,5 +69,13 @@ class SignalsProvider extends ChangeNotifier {
       _currentIndex = index;
       notifyListeners();
     }
+  }
+
+  void clearSignals() {
+    // Reset all signals data to initial state
+    _isLoading = false;
+    _error = null;
+    // Add any other signals-specific data that needs to be cleared
+    notifyListeners();
   }
 } 

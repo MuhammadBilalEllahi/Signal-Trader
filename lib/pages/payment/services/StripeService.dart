@@ -5,6 +5,7 @@ import 'package:tradingapp/shared/client/ApiClient.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:tradingapp/shared/constants/app_constants.dart';
+
 class StripeService {
   static final StripeService _instance = StripeService._internal();
   final ApiClient _apiClient = ApiClient();
@@ -30,7 +31,7 @@ class StripeService {
       if (response['proceedTOPaymentPage']) {
         debugPrint("RESPONSE: ${response}");
         // Initialize payment sheet
-         await Stripe.instance.initPaymentSheet(
+        await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
             paymentIntentClientSecret: response['clientSecret'],
             merchantDisplayName: AppConstants.appName,
@@ -39,25 +40,22 @@ class StripeService {
         );
 
         // Present payment sheet
-      await Stripe.instance.presentPaymentSheet();
-      
+        await Stripe.instance.presentPaymentSheet();
 
-      _apiClient.post('user-subscribes/user/paid', {});
-        if(response['success']){
+        // Post to /user/paid only if payment is successful
+        final paidResponse = await _apiClient.post('user-subscribes/user/paid', {});
+        if (paidResponse['success']) {
           return {'success': true};
-        }else{
-          return {'success': false, 'error': response['error']};
+        } else {
+          return {'success': false, 'error': paidResponse['error']};
         }
       }
       return {'success': false, 'error': 'Failed to initialize payment'};
       
     } catch (e) {
-     final response = await _apiClient.post('user-subscribes/user/failed', {});
-      if(response['success']){
-        return {'success': true};
-      }else{
-        return {'success': false, 'error': e.toString()};
-      }
+      // Post to /user/failed if there is an exception
+      final failedResponse = await _apiClient.post('user-subscribes/user/failed', {});
+      return {'success': false, 'error': e.toString()};
     }
   }
 

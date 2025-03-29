@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tradingapp/providers/subscription_provider.dart';
 import '../subscription/FuturesSubscription.dart';
 
 class TradingTypeSwitch extends StatelessWidget {
-  final bool hasFuturesAccess;
   final bool isSpotSelected;
   final Function(bool) onSpotSelected;
 
   const TradingTypeSwitch({
     super.key,
-    required this.hasFuturesAccess,
     required this.isSpotSelected,
     required this.onSpotSelected,
   });
@@ -16,6 +16,8 @@ class TradingTypeSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final subscriptionProvider = Provider.of<SubscriptionProvider>(context);
+    final hasFuturesAccess = subscriptionProvider.isSubscribed;
 
     return Container(
       height: 36,
@@ -49,12 +51,6 @@ class TradingTypeSwitch extends StatelessWidget {
                   context: context,
                   builder: (context) => const FuturesSubscriptionPage(),
                 );
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => const FuturesSubscriptionPage(),
-                //   ),
-                // );
                 return;
               }
               onSpotSelected(false);

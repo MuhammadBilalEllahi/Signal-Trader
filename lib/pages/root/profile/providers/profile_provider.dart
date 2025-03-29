@@ -6,6 +6,7 @@ class ProfileProvider extends ChangeNotifier {
   Map<String, dynamic>? _profileData;
   bool _isLoading = false;
   bool _isInitialized = false;
+  String? _error;
 
   Map<String, dynamic>? get profileData => _profileData;
   bool get isLoading => _isLoading;
@@ -43,6 +44,14 @@ class ProfileProvider extends ChangeNotifier {
 
   void updateProfile(Map<String, dynamic> newData) {
     _profileData = {...?_profileData, ...newData};
+    notifyListeners();
+  }
+
+  void clearProfile() {
+    // Reset all profile data to initial state
+    _isLoading = false;
+    _error = null;
+    // Add any other profile-specific data that needs to be cleared
     notifyListeners();
   }
 } 

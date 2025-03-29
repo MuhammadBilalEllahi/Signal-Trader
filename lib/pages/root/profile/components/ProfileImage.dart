@@ -5,6 +5,8 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:tradingapp/pages/auth/services/UserService.dart';
 import 'package:tradingapp/pages/root/profile/components/SubscriptionInfo.dart';
 import 'package:tradingapp/pages/root/subscription/SubscriptionPage.dart';
+import 'package:tradingapp/providers/subscription_provider.dart';
+
 class ProfileImage extends StatefulWidget {
   const ProfileImage({super.key});
 
@@ -15,7 +17,19 @@ class ProfileImage extends StatefulWidget {
 class _ProfileImageState extends State<ProfileImage> {
   bool _showQR = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // Check subscription status when the widget is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<SubscriptionProvider>(context, listen: false).checkSubscriptionStatus();
+    });
+  }
+
   Widget _buildSubscriptionCard() {
+    final subscriptionProvider = Provider.of<SubscriptionProvider>(context);
+    final isSubscribed = subscriptionProvider.isSubscribed;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -42,26 +56,26 @@ class _ProfileImageState extends State<ProfileImage> {
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.star,
+              Icon(
+                isSubscribed ? Icons.workspace_premium : Icons.star,
                 color: Colors.white,
                 size: 20,
               ),
               const SizedBox(width: 8),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   Text(
-                    'Free Plan',
-                    style: TextStyle(
+                    isSubscribed ? 'Pro Plan' : 'Free Plan',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   Text(
-                    'Upgrade to Pro',
-                    style: TextStyle(
+                    isSubscribed ? 'Active Subscription' : 'Upgrade to Pro',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -71,32 +85,32 @@ class _ProfileImageState extends State<ProfileImage> {
               ),
             ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => 
-                  // PaymentPage(selectedPlan: 1),
-                  SubscriptionPage())
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: Theme.of(context).colorScheme.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
+          if (!isSubscribed)
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SubscriptionPage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Theme.of(context).colorScheme.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              child: const Text(
+                'Subscribe',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
               ),
             ),
-            child: const Text(
-              'Subscribe',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
-            ),
-          ),
         ],
       ),
     );
