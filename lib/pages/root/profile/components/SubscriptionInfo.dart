@@ -57,6 +57,7 @@ class _SubscriptionInfoState extends State<SubscriptionInfo> {
     try {
       final result = await _stripeService.createSubscription(_priceId!, _productId!);
 
+      debugPrint("RESULT:------------------------------- ${result}");
       if (result['success']) {
         if (mounted) {
           Provider.of<SubscriptionProvider>(context, listen: false).checkSubscriptionStatus();
@@ -66,7 +67,7 @@ class _SubscriptionInfoState extends State<SubscriptionInfo> {
             MaterialPageRoute(
               builder: (context) => PaymentSuccessPage(
                 planName: widget.planDetails['product']['name'],
-                amount: '\$${(widget.planDetails['unit_amount'] / 100).toStringAsFixed(2)}',
+                transactionDetails: result['transactionDetails'],
               ),
             ),
           );

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:tradingapp/pages/root/profile/components/SubscriptionInfo.dart';
+import 'package:tradingapp/pages/root/subscription/SubscriptionPage.dart';
 import 'package:tradingapp/pages/signals/subscription/SubscriptionPlans.dart';
 
 class FuturesSubscriptionPage extends StatelessWidget {
@@ -123,7 +125,7 @@ class FuturesSubscriptionPage extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              "\$49.99/month",
+                              "\$10.00/month",
                               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                 color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.w600,
@@ -134,14 +136,12 @@ class FuturesSubscriptionPage extends StatelessWidget {
                         ElevatedButton(
                           onPressed: () {
                             
-                            Navigator.pushAndRemoveUntil(
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const SubscriptionPlans(),
-                              
-                            ),
-                            (route) => false,
-                          );
+                                builder: (context) => const SubscriptionPage(),
+                              ),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(

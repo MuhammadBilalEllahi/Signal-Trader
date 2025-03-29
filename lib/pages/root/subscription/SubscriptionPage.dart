@@ -73,9 +73,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => PaymentSuccessPage(
+              builder: (context) => PaymentSuccessPage( 
+                transactionDetails: result,
                 planName: plan['product']['name'],
-                amount: '\$${(plan['unit_amount'] / 100).toStringAsFixed(2)}',
               ),
             ),
           );

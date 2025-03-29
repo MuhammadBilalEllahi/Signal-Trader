@@ -64,12 +64,13 @@ class _ProfileState extends State<Profile> {
               children: [
                 if (profileProvider.isLoading)
                   const LinearProgressIndicator(),
-                ProfileListTile(
-                  title: 'Phone Number',
-                  icon: Icons.phone,
-                  subtitleIcon: Icons.local_phone,
-                  value: phone,
-                ),
+                if (phone.isNotEmpty)
+                  ProfileListTile(
+                    title: 'Phone Number',
+                    icon: Icons.phone,
+                    subtitleIcon: Icons.local_phone,
+                    value: phone,
+                  ),
                 ProfileListTile(
                   title: 'Email Address',
                   icon: Icons.email,

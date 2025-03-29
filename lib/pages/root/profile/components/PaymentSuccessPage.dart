@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 class PaymentSuccessPage extends StatefulWidget {
+  final Map<String, dynamic> transactionDetails;
   final String planName;
-  final String amount;
-
   const PaymentSuccessPage({
+    required this.transactionDetails,
     required this.planName,
-    required this.amount,
     super.key,
   });
 
@@ -21,10 +20,14 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
   late Animation<double> _scaleAnimation;
   late Animation<double> _rotateAnimation;
   late Animation<double> _opacityAnimation;
+  
 
   @override
   void initState() {
     super.initState();
+
+    debugPrint("INIT DETAILS:------------------------------- ${widget.transactionDetails}");
+
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
@@ -61,6 +64,8 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
   }
 
   Widget _buildFeatureItem(String text, IconData icon) {
+        debugPrint("DETAILS:------------------------------- ${widget.transactionDetails}");
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -91,8 +96,85 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
     );
   }
 
+  Widget _buildTransactionDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withOpacity(0.7),
+                      fontSize: 13,
+                ),
+          ),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+ Widget _buildTransactionDetailRowTransactionId(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withOpacity(0.7),
+                      fontSize: 13,
+                ),
+          ),
+          Text(
+            value.toString().split('_').last,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  String _formatAmount(int amount, String currency) {
+    final int amountInCents = amount;
+    final double amountInCurrency = amountInCents / 100; // Convert from cents to dollars
+    return '${amountInCurrency.toStringAsFixed(2)} ${currency.toUpperCase()}';
+  }
+
+  String _formatDate(dynamic timestamp) {
+    try {
+      // Convert string to int if needed
+      final int timestampInt = timestamp is String ? int.parse(timestamp) : timestamp;
+      final DateTime date = DateTime.fromMillisecondsSinceEpoch(timestampInt);
+      return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute}';
+    } catch (e) {
+      debugPrint("Error formatting date: $e");
+      return 'N/A';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final details = widget.transactionDetails;
+    
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
@@ -182,63 +264,30 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
                               ),
                               child: Column(
                                 children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Amount Paid',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium
-                                            ?.copyWith(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurface
-                                                  .withOpacity(0.7),
-                                            ),
-                                      ),
-                                      Text(
-                                        widget.amount,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                            ),
-                                      ),
-                                    ],
+                                  _buildTransactionDetailRow(
+                                    'Amount Paid',
+                                    _formatAmount(details['amount'], details['currency']),
                                   ),
                                   const Divider(height: 32),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Transaction ID',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium
-                                            ?.copyWith(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurface
-                                                  .withOpacity(0.7),
-                                            ),
-                                      ),
-                                      Text(
-                                        '#${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                    ],
+                                  _buildTransactionDetailRowTransactionId(
+                                    'Transaction ID',
+                                    '#${details['paymentIntentId']}',
+                                  ),
+                                  const Divider(height: 32),
+                                  _buildTransactionDetailRow(
+                                    'Payment Method',
+                                    'Card'
+                                    // '•••• ${details['paymentMethodId']?.substring(details['paymentMethodId'].length - 4) ?? 'N/A'}',
+                                  ),
+                                  const Divider(height: 32),
+                                  _buildTransactionDetailRow(
+                                    'Date & Time',
+                                    _formatDate(details['created']),
+                                  ),
+                                  const Divider(height: 32),
+                                  _buildTransactionDetailRow(
+                                    'Status',
+                                    details['status']?.toString().toUpperCase() ?? 'N/A',
                                   ),
                                 ],
                               ),
@@ -271,18 +320,18 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
                                         ),
                                   ),
                                   const SizedBox(height: 16),
-                                  _buildFeatureItem(
-                                    'Access premium trading signals',
-                                    Icons.trending_up,
-                                  ),
-                                  _buildFeatureItem(
-                                    'Explore market analysis',
-                                    Icons.analytics,
-                                  ),
-                                  _buildFeatureItem(
-                                    'Set up notifications',
-                                    Icons.notifications_active,
-                                  ),
+                                  // _buildFeatureItem(
+                                  //   'Access premium trading signals',
+                                  //   Icons.trending_up,
+                                  // ),
+                                  // _buildFeatureItem(
+                                  //   'Explore market analysis',
+                                  //   Icons.analytics,
+                                  // ),
+                                  // _buildFeatureItem(
+                                  //   'Set up notifications',
+                                  //   Icons.notifications_active,
+                                  // ),
                                 ],
                               ),
                             ),

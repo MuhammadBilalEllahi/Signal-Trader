@@ -121,7 +121,7 @@ class _ProfileImageState extends State<ProfileImage> {
     final userService = Provider.of<UserService>(context);
     debugPrint("This is userService.user: ${userService.user}");
     final profileImage = userService.user?.photoURL;
-    final name = userService.user?.displayName ?? "Anna Shevchenko";
+    final name = userService.user?.displayName ?? "Crypto User";
     
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,

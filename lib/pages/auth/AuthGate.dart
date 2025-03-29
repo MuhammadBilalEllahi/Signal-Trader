@@ -5,6 +5,9 @@ import 'package:tradingapp/pages/auth/OnBoardingScreen.dart';
 import 'package:tradingapp/pages/auth/SignOrSignUp.dart';
 import 'package:tradingapp/pages/root/Layout.dart';
 import 'package:tradingapp/pages/auth/services/UserService.dart';
+import 'package:tradingapp/pages/auth/services/AuthService.dart';
+import 'package:tradingapp/pages/root/profile/providers/profile_provider.dart';
+import 'package:tradingapp/pages/signals/providers/signals_provider.dart';
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
@@ -24,27 +27,43 @@ class _AuthGateState extends State<AuthGate> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: StreamBuilder(
-            stream: _firebaseAuth.authStateChanges(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return const Center(child: Text("Error Occurred"));
-              }
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center();
-              }
-              if (snapshot.hasData) {
-                // print("USER DATA is ${snapshot.data}\n\n");
-                Future.microtask(() {
-                  // ignore: use_build_context_synchronously
-                  Provider.of<UserService>(context, listen: false)
-                      .setUser(snapshot.data);
-                });
+      body: StreamBuilder<User?>(
+        stream: _firebaseAuth.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(child: Text("Error Occurred"));
+          }
+          
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-                return Layout();
-              } else {
-                return OnBoardingScreen();
+          if (snapshot.hasData && snapshot.data != null) {
+            // Update user state in UserService
+            // WidgetsBinding.instance.addPostFrameCallback((_) {
+              final userService = Provider.of<UserService>(context, listen: false);
+              final authService = Provider.of<AuthService>(context, listen: false);
+              final profileProvider = Provider.of<ProfileProvider>(context, listen: false); 
+              final signalsProvider = Provider.of<SignalsProvider>(context, listen: false);
+              
+              // Only update if the user is different
+              if (userService.user?.uid != snapshot.data?.uid) {
+                userService.setUser(snapshot.data);
+                // Check 2FA status
+                authService.is2FAEnabled().then((isEnabled) {
+                  if (isEnabled) {
+                    authService.reset2FARequirement();
+                  }
+                });
               }
-            }));
+            // });
+
+            return const Layout();
+          } else {
+            return const OnBoardingScreen();
+          }
+        },
+      ),
+    );
   }
 }

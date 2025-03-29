@@ -356,15 +356,15 @@ class _CreditCardPageState extends State<CreditCardPage> {
                                         // Add payment processing logic here
                                         await Future.delayed(const Duration(seconds: 2));
                                         if (mounted) {
-                                          Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => PaymentSuccessPage(
-                                                planName: widget.planName,
-                                                amount: widget.amount,
-                                              ),
-                                            ),
-                                          );
+                                          // Navigator.pushReplacement(
+                                          //   context,
+                                          //   MaterialPageRoute(
+                                          //     builder: (context) => PaymentSuccessPage(
+                                          //       planName: widget.planName,
+                                          //       amount: widget.amount,
+                                          //     ),
+                                          //   ),
+                                          // );
                                         }
                                       }
                                     },

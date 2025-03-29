@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:tradingapp/shared/constants/app_constants.dart';
 import 'package:tradingapp/shared/client/ApiClient.dart';
 import 'package:tradingapp/shared/constants/constants.dart';
-  import 'package:tradingapp/pages/auth/services/TOTPService.dart';
+import 'package:tradingapp/pages/auth/services/TOTPService.dart';
 
 class AuthService extends ChangeNotifier {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -33,6 +33,11 @@ class AuthService extends ChangeNotifier {
         'password': password,
         'firebaseUid': userCredential.user!.uid,
       });
+
+      // Update user state
+      if (userCredential.user != null) {
+        notifyListeners();
+      }
 
       return userCredential;
     } catch (e) {
@@ -230,6 +235,11 @@ class AuthService extends ChangeNotifier {
       // Store the token if needed
       final token = response['access_token'];
       // You might want to store this token in secure storage
+
+      // Update user state
+      if (userCredential.user != null) {
+        notifyListeners();
+      }
 
       return userCredential;
     } catch (e) {
