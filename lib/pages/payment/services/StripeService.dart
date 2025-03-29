@@ -21,8 +21,8 @@ class StripeService {
     await Stripe.instance.applySettings();
   }
 
-  Future<dynamic> createSubscription(String priceId) async {
-    final response = await _apiClient.post('user-subscribes/user/pay-plan/$priceId', {});
+  Future<dynamic> createSubscription(String priceId, String productId) async {
+    final response = await _apiClient.post('user-subscribes/user/pay-plan/$priceId/$productId', {});
     return response;
   }
 }

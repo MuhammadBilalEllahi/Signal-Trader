@@ -15,12 +15,13 @@ class _SubscriptionInfoState extends State<SubscriptionInfo> {
   bool _isLoading = false;
   String? _error;
   String? _priceId;
-
+  String? _productId;
   @override
   void initState() {
     super.initState();
     _initializeStripe();
-    _priceId = widget.planDetails['product']['id'];
+    _productId = widget.planDetails['product']['id'];
+    _priceId = widget.planDetails['id'];
     debugPrint("DATA from subscription page: ${widget.planDetails}");
   }
 
@@ -42,7 +43,7 @@ class _SubscriptionInfoState extends State<SubscriptionInfo> {
     });
 
     try {
-      final result = await _stripeService.createSubscription(_priceId!);
+      final result = await _stripeService.createSubscription(_priceId!, _productId!);
 
       if (result['success']) {
         if (mounted) {
@@ -71,6 +72,9 @@ class _SubscriptionInfoState extends State<SubscriptionInfo> {
 
   @override
   Widget build(BuildContext context) {
+    final unitAmount = widget.planDetails['unit_amount'] ?? 0;
+    final price = (unitAmount / 100).toStringAsFixed(2);
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Payment'),
@@ -87,15 +91,15 @@ class _SubscriptionInfoState extends State<SubscriptionInfo> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Selected Plan: ${widget.planDetails['product']['name']}',
+                      'Selected Plan: ${widget.planDetails['product']?['name'] ?? 'Unknown Plan'}',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Price: ${widget.planDetails['currency']}${(widget.planDetails['unit_amount'] ?? 0 / 100).toStringAsFixed(2)}',
+                      'Price: ${widget.planDetails['currency'] ?? 'USD'}$price',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    if (widget.planDetails['product']['description'] != null) ...[
+                    if (widget.planDetails['product']?['description'] != null) ...[
                       const SizedBox(height: 8),
                       Text(widget.planDetails['product']['description']),
                     ],
@@ -120,7 +124,7 @@ class _SubscriptionInfoState extends State<SubscriptionInfo> {
                 ),
               ),
             ElevatedButton(
-              onPressed: _isLoading || _priceId == null ? null : _handlePayment,
+              onPressed: _isLoading || widget.planDetails['id'] == null ? null : _handlePayment,
               child: _isLoading
                   ? const CircularProgressIndicator()
                   : const Text('Pay Now'),
