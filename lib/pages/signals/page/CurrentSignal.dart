@@ -97,6 +97,11 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
 
   void _connectSocket() async {
     String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
+    if (token == null) {
+      debugPrint('No token available for WebSocket connection');
+      return;
+    }
+
     socket = IO.io(
       "${ApiConstants.baseUrl}${ApiConstants.signals}",
       IO.OptionBuilder()
