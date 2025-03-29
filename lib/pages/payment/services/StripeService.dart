@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:tradingapp/shared/client/ApiClient.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
-
+import 'package:tradingapp/shared/constants/app_constants.dart';
 class StripeService {
   static final StripeService _instance = StripeService._internal();
   final ApiClient _apiClient = ApiClient();
@@ -28,30 +28,36 @@ class StripeService {
       final response = await _apiClient.post('user-subscribes/user/pay-plan/$priceId/$productId', {});
       
       if (response['proceedTOPaymentPage']) {
-        // Get the client secret from the subscription
-        final subscriptionResponse = await _apiClient.post('stripe/create-subscription', {
-          'priceId': priceId,
-          'productId': productId,
-        });
-
+        debugPrint("RESPONSE: ${response}");
         // Initialize payment sheet
-        await Stripe.instance.initPaymentSheet(
+         await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
-            paymentIntentClientSecret: subscriptionResponse['clientSecret'],
-            merchantDisplayName: 'Trading App',
+            paymentIntentClientSecret: response['clientSecret'],
+            merchantDisplayName: AppConstants.appName,
             style: ThemeMode.system,
           ),
         );
 
         // Present payment sheet
-        await Stripe.instance.presentPaymentSheet();
-
-        return {'success': true};
-      }
+      await Stripe.instance.presentPaymentSheet();
       
+
+      _apiClient.post('user-subscribes/user/paid', {});
+        if(response['success']){
+          return {'success': true};
+        }else{
+          return {'success': false, 'error': response['error']};
+        }
+      }
       return {'success': false, 'error': 'Failed to initialize payment'};
+      
     } catch (e) {
-      return {'success': false, 'error': e.toString()};
+     final response = await _apiClient.post('user-subscribes/user/failed', {});
+      if(response['success']){
+        return {'success': true};
+      }else{
+        return {'success': false, 'error': e.toString()};
+      }
     }
   }
 

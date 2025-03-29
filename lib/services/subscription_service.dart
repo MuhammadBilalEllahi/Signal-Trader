@@ -13,16 +13,16 @@ class SubscriptionService {
     }
   }
 
-  Future<dynamic> createSubscription(String priceId) async {
-    try {
-      final response = await _apiService.post('/stripe/create-subscription', {
-        'priceId': priceId,
-      });
-      return response;
-    } catch (e) {
-      throw Exception('Failed to create subscription: $e');
-    }
-  }
+  // Future<dynamic> createSubscription(String priceId) async {
+  //   try {
+  //     final response = await _apiService.post('/stripe/create-subscription', {
+  //       'priceId': priceId,
+  //     });
+  //     return response;
+  //   } catch (e) {
+  //     throw Exception('Failed to create subscription: $e');
+  //   }
+  // }
 
   Future<dynamic> getSubscriptionStatus() async {
     try {
