@@ -9,7 +9,7 @@ class NewsAlertsService {
     try {
       final response = await _apiClient.get('news-alerts/all-paginated?page=$page&limit=$limit');
       
-      debugPrint("response---- $response");
+      //debugPrint("response---- $response");
       if (response != null && response is List) {
         return List<Map<String, dynamic>>.from(response);
       }

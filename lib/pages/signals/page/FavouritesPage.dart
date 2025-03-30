@@ -54,7 +54,7 @@ print("Response Fav $response");
         });
       }
     } catch (e) {
-      debugPrint("Error fetching favourite signals: $e");
+      //debugPrint("Error fetching favourite signals: $e");
     } finally {
       setState(() => isLoading = false);
     }
@@ -149,14 +149,14 @@ print("Response Fav $response");
 
 //   Future<List<dynamic>> getSignalHistory() async {
 //     final apiClient = ApiClient();
-//     debugPrint("🔹 Sending GET request to: ${ApiConstants.baseUrl}${ApiConstants.signalsFavourites}");
+//     //debugPrint("🔹 Sending GET request to: ${ApiConstants.baseUrl}${ApiConstants.signalsFavourites}");
 
 //     try {
 //       final response = await apiClient.get(ApiConstants.signalsFavourites);
-//       debugPrint("✅ Response received: $response");
+//       //debugPrint("✅ Response received: $response");
 //       return response is List ? response : [];
 //     } catch (e) {
-//       debugPrint("❌ Error in GET request: $e");
+//       //debugPrint("❌ Error in GET request: $e");
 //       return [];
 //     }
 //   }
@@ -209,10 +209,10 @@ print("Response Fav $response");
 // //   Future<List<dynamic>> getSignalHistory() async {
 
 // //     final apiClient = ApiClient();
-// //         debugPrint("🔹 Sending GET request to: ${ApiConstants.baseUrl}${ApiConstants.signalsFavourites}");
+// //         //debugPrint("🔹 Sending GET request to: ${ApiConstants.baseUrl}${ApiConstants.signalsFavourites}");
 
 // //     final response = await apiClient.get(ApiConstants.signalsFavourites);
-// //     debugPrint("REPS $response");
+// //     //debugPrint("REPS $response");
 // //     return response is List ? response : []; // Ensure it's a list
 // //   }
 

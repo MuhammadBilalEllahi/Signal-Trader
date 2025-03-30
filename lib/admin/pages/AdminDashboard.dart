@@ -69,7 +69,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       // Get Firebase token & email
       String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
       String? email = FirebaseAuth.instance.currentUser?.email;
-      debugPrint("TOKEN: $token");
+      //debugPrint("TOKEN: $token");
 
       // Convert expiry date to Unix timestamp (seconds)
       int expireAtUnix = _expireAt!.millisecondsSinceEpoch; // Ensure it's in SECONDS
@@ -101,7 +101,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         );
       }
     } catch (e) {
-      debugPrint("Error posting signal: $e");
+      //debugPrint("Error posting signal: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
       );

@@ -41,7 +41,7 @@ class AuthService extends ChangeNotifier {
 
       return userCredential;
     } catch (e) {
-      debugPrint("Email Sign Up Error: $e");
+      //debugPrint("Email Sign Up Error: $e");
       rethrow;
     }
   }
@@ -62,14 +62,14 @@ class AuthService extends ChangeNotifier {
         },
         codeSent: (String verificationId, int? resendToken) async {
           // Store verificationId for later use
-          debugPrint("SMS Code Sent");
+          //debugPrint("SMS Code Sent");
         },
         codeAutoRetrievalTimeout: (String verificationId) {
-          debugPrint("Auto Retrieval Timeout");
+          //debugPrint("Auto Retrieval Timeout");
         },
       );
     } catch (e) {
-      debugPrint("Phone Sign Up Error: $e");
+      //debugPrint("Phone Sign Up Error: $e");
       rethrow;
     }
   }
@@ -84,7 +84,7 @@ class AuthService extends ChangeNotifier {
 
       return await _firebaseAuth.signInWithCredential(credential);
     } catch (e) {
-      debugPrint("Phone Verification Error: $e");
+      //debugPrint("Phone Verification Error: $e");
       rethrow;
     }
   }
@@ -97,7 +97,7 @@ class AuthService extends ChangeNotifier {
         'email': email,
       });
     } catch (e) {
-      debugPrint("Password Reset Error: $e");
+      //debugPrint("Password Reset Error: $e");
       rethrow;
     }
   }
@@ -119,7 +119,7 @@ class AuthService extends ChangeNotifier {
       final generatedSecret = await generateSecret();
       final secret = generatedSecret['secret'] ?? '';
       final otpauthUrl = generatedSecret['otpauth_url'] ?? '';
-    debugPrint('secret $secret, otpauthUrl $otpauthUrl'); 
+    //debugPrint('secret $secret, otpauthUrl $otpauthUrl'); 
       return {
         'alreadyEnabled': generatedSecret['alreadyEnabled'] ?? false,
         'secret': secret,
@@ -142,7 +142,7 @@ class AuthService extends ChangeNotifier {
         'firebaseUid': user.uid,
       });
 
-      debugPrint('response from verify2FAInitialize $response');
+      //debugPrint('response from verify2FAInitialize $response');
 
       return response['success'] ?? false;
     } catch (e) {
@@ -209,7 +209,7 @@ class AuthService extends ChangeNotifier {
 
       return userCredential;
     } catch (e) {
-      debugPrint("Google Auth Error: $e");
+      //debugPrint("Google Auth Error: $e");
       rethrow;
     }
   }
@@ -243,7 +243,7 @@ class AuthService extends ChangeNotifier {
 
       return userCredential;
     } catch (e) {
-      debugPrint("Email Sign In Error: $e");
+      //debugPrint("Email Sign In Error: $e");
       rethrow;
     }
   }

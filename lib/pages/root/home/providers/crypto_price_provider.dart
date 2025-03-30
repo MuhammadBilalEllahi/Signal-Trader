@@ -118,15 +118,15 @@ class CryptoPriceProvider extends ChangeNotifier {
             _lastUpdateTime = DateTime.now();
           }
         } catch (e) {
-          debugPrint('Error processing message: $e');
+          //debugPrint('Error processing message: $e');
         }
       },
       onError: (error) {
-        debugPrint('WebSocket error: $error');
+        //debugPrint('WebSocket error: $error');
         _scheduleReconnect();
       },
       onDone: () {
-        debugPrint('WebSocket connection closed');
+        //debugPrint('WebSocket connection closed');
         _scheduleReconnect();
       },
     );

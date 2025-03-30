@@ -48,7 +48,7 @@ class StripeService {
       final response = await _apiClient.post('user-subscribes/user/pay-plan/$priceId/$productId', {});
       
       if (response['proceedTOPaymentPage']) {
-        debugPrint("RESPONSE: ${response}");
+        //debugPrint("RESPONSE: ${response}");
         // Initialize payment sheet
         await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
@@ -96,7 +96,7 @@ class StripeService {
       return {'success': false, 'error': 'Failed to initialize payment'};
       
     } catch (e) {
-      debugPrint("Payment Error: $e");
+      //debugPrint("Payment Error: $e");
       // Post to /user/failed if there is an exception
       final failedResponse = await _apiClient.post('user-subscribes/user/failed', {
         'error': e.toString()
@@ -110,7 +110,7 @@ class StripeService {
       final response = await _apiClient.get('user-subscribes/user/transactions');
       return response;
     } catch (e) {
-      debugPrint("Get Transaction History Error: $e");
+      //debugPrint("Get Transaction History Error: $e");
       return {'success': false, 'error': e.toString()};
     }
   }
@@ -120,7 +120,7 @@ class StripeService {
       final response = await _apiClient.get('user-subscribes/user/current-subscription');
       return response;
     } catch (e) {
-      debugPrint("Get Current Subscription Error: $e");
+      //debugPrint("Get Current Subscription Error: $e");
       return {'success': false, 'error': e.toString()};
     }
   }

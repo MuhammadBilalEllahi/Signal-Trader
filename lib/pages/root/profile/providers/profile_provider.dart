@@ -35,7 +35,7 @@ class ProfileProvider extends ChangeNotifier {
         }
       }
     } catch (e) {
-      debugPrint("Error fetching profile data: $e");
+      //debugPrint("Error fetching profile data: $e");
     } finally {
       _isLoading = false;
       notifyListeners();

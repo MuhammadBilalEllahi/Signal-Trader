@@ -26,7 +26,7 @@ class _SubscriptionInfoState extends State<SubscriptionInfo> {
     _initializeStripe();
     _productId = widget.planDetails['product']['id'];
     _priceId = widget.planDetails['id'];
-    debugPrint("DATA from subscription page: ${widget.planDetails}");
+    //debugPrint("DATA from subscription page: ${widget.planDetails}");
   }
 
   Future<void> _initializeStripe() async {
@@ -57,7 +57,7 @@ class _SubscriptionInfoState extends State<SubscriptionInfo> {
     try {
       final result = await _stripeService.createSubscription(_priceId!, _productId!);
 
-      debugPrint("RESULT:------------------------------- ${result}");
+      //debugPrint("RESULT:------------------------------- ${result}");
       if (result['success']) {
         if (mounted) {
           Provider.of<SubscriptionProvider>(context, listen: false).checkSubscriptionStatus();

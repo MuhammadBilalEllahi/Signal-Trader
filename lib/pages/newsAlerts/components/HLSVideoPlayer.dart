@@ -122,7 +122,7 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
       await _controller!.seekTo(newPosition);
       _showControlsTemporarily();
     } catch (e) {
-      debugPrint('Error seeking video: $e');
+      //debugPrint('Error seeking video: $e');
     }
   }
 
@@ -142,7 +142,7 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
       
       _showControlsTemporarily();
     } catch (e) {
-      debugPrint('Error toggling play/pause: $e');
+      //debugPrint('Error toggling play/pause: $e');
     }
   }
 
@@ -198,7 +198,7 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
           '';
 
       if (initialUrl.isEmpty) {
-        debugPrint('No valid video URL available');
+        //debugPrint('No valid video URL available');
         return;
       }
       
@@ -237,7 +237,7 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
         await _controller!.setLooping(widget.looping);
       }
     } catch (e) {
-      debugPrint('Error initializing video player: $e');
+      //debugPrint('Error initializing video player: $e');
       if (mounted) {
         setState(() {
           _isInitialized = false;
@@ -323,7 +323,7 @@ class _HLSVideoPlayerState extends State<HLSVideoPlayer> {
         });
       }
     } catch (e) {
-      debugPrint('Error changing quality: $e');
+      //debugPrint('Error changing quality: $e');
       setState(() {
         _isBuffering = false;
       });

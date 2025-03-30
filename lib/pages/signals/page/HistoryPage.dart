@@ -44,7 +44,7 @@ class _HistoryPageState extends State<HistoryPage> {
         List<Map<String, dynamic>> newHistory =
             List<Map<String, dynamic>>.from(response["history"]);
 
-        debugPrint("\n\nREsponse $response");
+        //debugPrint("\n\nREsponse $response");
         setState(() {
           if (isLoadMore) {
             if (newHistory.isNotEmpty) {
@@ -65,7 +65,7 @@ class _HistoryPageState extends State<HistoryPage> {
         setState(() => hasMore = false); // No more data
       }
     } catch (e) {
-      debugPrint("Error fetching history: $e");
+      //debugPrint("Error fetching history: $e");
     } finally {
       setState(() => isLoading = false);
     }

@@ -8,8 +8,8 @@ class SubscriptionService {
   Future<Map<String, dynamic>> getStripePlans() async {
     try {
       final response = await _apiService.get('/stripe/prices/checkUserSubscribe');
-      debugPrint("===========================================================================================================================================================");
-      debugPrint("______response   ${response.toString()}");
+      //debugPrint("===========================================================================================================================================================");
+      //debugPrint("______response   ${response.toString()}");
       
       // Check if response is already a Map
       if (response is Map<String, dynamic>) {

@@ -98,7 +98,7 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
   void _connectSocket() async {
     String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
     if (token == null) {
-      debugPrint('No token available for WebSocket connection');
+      //debugPrint('No token available for WebSocket connection');
       return;
     }
 
@@ -111,17 +111,17 @@ class _CurrentSignalsPageState extends State<CurrentSignalsPage> {
     );
 
     socket.onConnect((_) {
-      debugPrint('Connected to WebSocket');
+      //debugPrint('Connected to WebSocket');
       socket.emit('subscribeToSignals');
     });
 
     socket.on('new-signal', (data) {
-      debugPrint("SIGNAL DATA---- $data");
+      //debugPrint("SIGNAL DATA---- $data");
       if (data != null && data is Map<String, dynamic>) {
-        debugPrint("SIGNAL DATA---000- $data");
+        //debugPrint("SIGNAL DATA---000- $data");
         Provider.of<SignalsProvider>(context, listen: false).addNewSignal(data);
       } else {
-        debugPrint("Invalid signal data received: $data");
+        //debugPrint("Invalid signal data received: $data");
       }
     });
 

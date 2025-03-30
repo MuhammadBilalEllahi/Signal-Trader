@@ -99,7 +99,7 @@ class MediaCacheService {
           _addToVideoCache(reel['_id'], controller);
         }
       } catch (e) {
-        debugPrint('Error preloading video: $e');
+        //debugPrint('Error preloading video: $e');
       }
     }
   }
@@ -135,7 +135,7 @@ class MediaCacheService {
           final bytes = await file.readAsBytes();
           _imageCache[imageUrl] = bytes;
         } catch (e) {
-          debugPrint('Error preloading image: $e');
+          //debugPrint('Error preloading image: $e');
         }
       }
     }

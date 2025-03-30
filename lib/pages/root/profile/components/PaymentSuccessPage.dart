@@ -29,7 +29,7 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
   void initState() {
     super.initState();
 
-    debugPrint("INIT DETAILS:------------------------------- ${widget.transactionDetails}");
+    //debugPrint("INIT DETAILS:------------------------------- ${widget.transactionDetails}");
 
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1500),
@@ -71,7 +71,7 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
   }
 
   Widget _buildFeatureItem(String text, IconData icon) {
-        debugPrint("DETAILS:------------------------------- ${widget.transactionDetails}");
+        //debugPrint("DETAILS:------------------------------- ${widget.transactionDetails}");
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -173,7 +173,7 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
       final DateTime date = DateTime.fromMillisecondsSinceEpoch(timestampInt);
       return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute}';
     } catch (e) {
-      debugPrint("Error formatting date: $e");
+      //debugPrint("Error formatting date: $e");
       return 'N/A';
     }
   }

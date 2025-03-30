@@ -41,7 +41,7 @@ class _TwoFactorSetupScreenState extends State<TwoFactorSetupScreen> {
 
     try {
       final response = await context.read<AuthService>().enable2FA();
-      debugPrint('response from enable2FA--------- $response');
+      //debugPrint('response from enable2FA--------- $response');
       setState(() {
         _secret = response['secret'];
         _qrUrl = response['otpauth_url'];

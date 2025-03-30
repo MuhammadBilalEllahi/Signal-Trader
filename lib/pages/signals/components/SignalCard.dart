@@ -24,7 +24,7 @@ class _SignalCardState extends State<SignalCard> {
   void initState() {
     super.initState();
     isFavorite = widget.signal['isFavorite'] ?? false;
-    debugPrint('wiget.signal ${widget.signal}');
+    //debugPrint('wiget.signal ${widget.signal}');
     isPremiumSignal = widget.signal['subscriptionValue'] != 'spot-free' ? true : false;
   }
 
@@ -36,7 +36,7 @@ class _SignalCardState extends State<SignalCard> {
       await apiClient.post("${ApiConstants.baseUrl}signals/favorite/$signalId", {});
       setState(() => isFavorite = !isFavorite);
     } catch (e) {
-      debugPrint("❌ Error toggling favorite: $e");
+      //debugPrint("❌ Error toggling favorite: $e");
     }
   }
 
@@ -103,7 +103,7 @@ class _SignalCardState extends State<SignalCard> {
           return Theme.of(context).colorScheme.onPrimary;
       }
     }
-// debugPrint("${widget.signal['type']} ${widget.signal['coin']} ${widget.signal['direction']}",);
+// //debugPrint("${widget.signal['type']} ${widget.signal['coin']} ${widget.signal['direction']}",);
     return Container(
       
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
